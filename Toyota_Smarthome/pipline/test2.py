@@ -31,7 +31,7 @@ parser.add_argument('-epoch', type=str, default='50') #change default from "50" 
 parser.add_argument('-model', type=str, default='PDAN')  # change default from "" to "PDAN"
 parser.add_argument('-APtype', type=str, default='map') #change default from "wap" to "map"
 parser.add_argument('-randomseed', type=str, default='False')
-parser.add_argument('-load_model', type=str, default='./models/PDAN_TSU_RGB') # change default from "False" to "./models/PDAN"
+parser.add_argument('-load_model', type=str, default='./ict3104-p2-team08/Toyota_Smarthome/pipline/models/PDAN_TSU_RGB') # change default from "False" to "./models/PDAN"
 parser.add_argument('-num_channel', type=str, default='3') # change default from "False" to "3" (just random no idea why 3)
 parser.add_argument('-batch_size', type=str, default='2') # change default from "False" to "1"
 parser.add_argument('-kernelsize', type=str, default='False')
@@ -88,14 +88,14 @@ if args.dataset == 'TSU':
     classes = 51
 
     if split_setting == 'CS':
-        train_split = './data/smarthome_CS_51.json'
-        test_split = './data/smarthome_CS_51.json'
+        train_split = './ict3104-p2-team08/Toyota_Smarthome/pipline/data/smarthome_CS_51.json'
+        test_split = './ict3104-p2-team08/Toyota_Smarthome/pipline/data/smarthome_CS_51.json'
 
     elif split_setting == 'CV':
-        train_split = './data/smarthome_CV_51.json'
-        test_split = './data/smarthome_CV_51.json'
+        train_split = './ict3104-p2-team08/Toyota_Smarthome/pipline/data/smarthome_CV_51.json'
+        test_split = './ict3104-p2-team08/Toyota_Smarthome/pipline/data/smarthome_CV_51.json'
 
-    rgb_root = './data/RGB_i3d_16frames_64000_SSD'
+    rgb_root = './ict3104-p2-team08/Toyota_Smarthome/pipline/data/RGB_i3d_16frames_64000_SSD'
     skeleton_root = '/skeleton/feat/Path/'  #
 
 def sigmoid(x):
@@ -328,7 +328,7 @@ def val_step(model, gpu, dataloader, epoch):
 
 def create_caption_video(arrayWithCaptions):
     import cv2
-    cap = cv2.VideoCapture('C:/Users/leech/ict3104-p2-team08/Toyota_Smarthome/pipline/video_output/' + args.videofile + ".mp4")
+    cap = cv2.VideoCapture('./ict3104-p2-team08/Toyota_Smarthome/pipline/video_output/' + args.videofile + ".mp4")
 
     length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     numberOfFramePerCaption = math.ceil(length / len(arrayWithCaptions))
@@ -338,7 +338,7 @@ def create_caption_video(arrayWithCaptions):
     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     # we are using x264 codec for mp4
     fourcc = cv2.VideoWriter_fourcc(*'X264')
-    writer = cv2.VideoWriter('C:/Users/leech/ict3104-p2-team08/Toyota_Smarthome/pipline/video_output/' + args.videofile + '_caption.mp4', apiPreference=0, fourcc=fourcc,
+    writer = cv2.VideoWriter('./ict3104-p2-team08/Toyota_Smarthome/pipline/video_output/' + args.videofile + '_caption.mp4', apiPreference=0, fourcc=fourcc,
                              fps=video_fps[0], frameSize=(int(width), int(height)))
 
     i = 1 #frame counter
