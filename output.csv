@@ -1,0 +1,18 @@
+event,start_frame,end_frame
+Enter,0,97
+Walk,98,209
+Make_tea,210,257
+Make_tea/put something in sink,258,273
+Make_tea,274,337
+Make_tea/put something in sink,338,353
+Make_tea,354,385
+Walk,386,433
+Make_tea,434,465
+Make_tea.Boil_water,466,481
+Make_tea,482,513
+Leave,514,529
+Walk,530,593
+Leave,594,705
+Drink.From_cup,706,737
+unknown class 48,738,753
+Drink.From_cup,754,770
