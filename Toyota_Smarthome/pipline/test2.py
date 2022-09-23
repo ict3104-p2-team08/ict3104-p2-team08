@@ -33,7 +33,7 @@ parser.add_argument('-epoch', type=str, default='50') #change default from "50" 
 parser.add_argument('-model', type=str, default='PDAN')  # change default from "" to "PDAN"
 parser.add_argument('-APtype', type=str, default='map') #change default from "wap" to "map"
 parser.add_argument('-randomseed', type=str, default='False')
-parser.add_argument('-load_model', type=str, default='./ict3104-p2-team08/Toyota_Smarthome/pipline/models/PDAN') # change default from "False" to "./models/PDAN"
+parser.add_argument('-load_model', type=str, default='./Toyota_Smarthome/pipline/models/PDAN') # change default from "False" to "./models/PDAN"
 parser.add_argument('-num_channel', type=str, default='3') # change default from "False" to "3" (just random no idea why 3)
 parser.add_argument('-batch_size', type=str, default='2') # change default from "False" to "1"
 parser.add_argument('-kernelsize', type=str, default='False')
@@ -90,14 +90,14 @@ if args.dataset == 'TSU':
     classes = 51
 
     if split_setting == 'CS':
-        train_split = './ict3104-p2-team08/Toyota_Smarthome/pipline/data/smarthome_CS_51.json'
-        test_split = './ict3104-p2-team08/Toyota_Smarthome/pipline/data/smarthome_CS_51.json'
+        train_split = './Toyota_Smarthome/pipline/data/smarthome_CS_51.json'
+        test_split = './Toyota_Smarthome/pipline/data/smarthome_CS_51.json'
 
     elif split_setting == 'CV':
-        train_split = './ict3104-p2-team08/Toyota_Smarthome/pipline/data/smarthome_CV_51.json'
-        test_split = './ict3104-p2-team08/Toyota_Smarthome/pipline/data/smarthome_CV_51.json'
+        train_split = './Toyota_Smarthome/pipline/data/smarthome_CV_51.json'
+        test_split = './Toyota_Smarthome/pipline/data/smarthome_CV_51.json'
 
-    rgb_root = './ict3104-p2-team08/Toyota_Smarthome/pipline/data/RGB_i3d_16frames_64000_SSD'
+    rgb_root = './Toyota_Smarthome/pipline/data/RGB_i3d_16frames_64000_SSD'
     skeleton_root = '/skeleton/feat/Path/'  #
 
 def sigmoid(x):
@@ -127,7 +127,7 @@ activityList = ["Enter", "Walk", "Make_coffee.Get_water", "Make_tea/put somethin
        "Leave", "Put_something_on_table", "Drink.From_glass",  "unknown class 11",  "unknown class 12", "Drink.From_cup", "Dump_in_trash",  "Make_tea.Boil_water",
        "Make_tea", "Use_cupboard",  "unknown class 18", "Read", "Drink.From_bottle", "Use_fridge", "Wipe_table/clean dish with water",  "unknown class 23",
         "Eat_snack", "Sit_down", "Watch_TV", "Use_laptop", "Get_up",  "Drink.From_bottle",  "unknown class 30",  "unknown class 31",
-        "Lay_down",  "unknown class 33", "Write", "Breakfast.Eat_at_table", "unknown class 36", "unknown class 37", "unknown class 38",  "Breakfast.Cut_bread",
+        "Lay_down",  "unknown class 33", "Write", "Breakfast", "unknown class 36", "unknown class 37", "unknown class 38",  "Breakfast.Cut_bread",
         "Clean_dishes.Dry_up", "unknown class 41", "Cook.Use_stove",  "Cook.Cut",  "unknown class 44", "Cook.Stir", "Cook.Use_oven", "like uselaptop",
        "unknown class 48",  "unknown class 49", "unknown class 50"]
 
@@ -340,7 +340,7 @@ def create_caption_video(arrayWithCaptions):
     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     # we are using x264 codec for mp4
     fourcc = cv2.VideoWriter_fourcc(*'avc1')
-    writer = cv2.VideoWriter('./ict3104-p2-team08/Toyota_Smarthome/pipline/video_output/' + args.videofile + '_caption.mp4', apiPreference=0, fourcc=fourcc,
+    writer = cv2.VideoWriter('./Toyota_Smarthome/pipline/video_output/' + args.videofile + '_caption.mp4', apiPreference=0, fourcc=fourcc,
                              fps=video_fps[0], frameSize=(int(width), int(height)))
 
     i = 1 #frame counter
@@ -408,7 +408,7 @@ def create_caption_video(arrayWithCaptions):
                                 (0, 255, 0),
                                 2,
                                 cv2.LINE_4)
-            if i == int(annotated_csv[annotated_current_position][2]):
+            if i == int(annotated_csv[annotated_current_position][2]) and annotated_current_position < len(annotated_csv) - 1:
                 annotated_current_position += 1
 
 
@@ -452,7 +452,7 @@ def generateCSV(arrayForCSV):
         writer.writerows(arrayForCSV)
 
 def readCSV():
-    filePath = "./ict3104-p2-team08/data/input_csv/" + args.videofile + ".csv"
+    filePath = "./data/input_csv/" + args.videofile + ".csv"
     with open(filePath, newline='') as f:
         reader = csv.reader(f)
         data = list(reader)

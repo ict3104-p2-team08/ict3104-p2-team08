@@ -1,18 +1,246 @@
 event,start_frame,end_frame
-Enter,0,97
-Walk,98,209
-Make_tea,210,257
-Make_tea/put something in sink,258,273
-Make_tea,274,337
-Make_tea/put something in sink,338,353
-Make_tea,354,385
-Walk,386,433
-Make_tea,434,465
-Make_tea.Boil_water,466,481
-Make_tea,482,513
-Leave,514,529
-Walk,530,593
-Leave,594,705
-Drink.From_cup,706,737
-unknown class 48,738,753
-Drink.From_cup,754,770
+Walk,0,49
+Enter,50,113
+Walk,114,129
+Use_cupboard,130,145
+Walk,146,161
+Use_cupboard,162,177
+Sit_down,178,225
+Use_cupboard,226,241
+unknown class 30,242,257
+Use_cupboard,258,273
+Drink.From_bottle,274,321
+Use_cupboard,322,337
+unknown class 30,338,385
+Breakfast.Eat_at_table,386,401
+Drink.From_bottle,402,433
+unknown class 30,434,449
+Breakfast.Eat_at_table,450,1761
+unknown class 38,1762,1825
+Breakfast.Eat_at_table,1826,1857
+unknown class 38,1858,1873
+Breakfast.Eat_at_table,1874,2145
+Drink.From_cup,2146,2241
+Breakfast.Eat_at_table,2242,2369
+unknown class 38,2370,2401
+Breakfast.Eat_at_table,2402,2417
+unknown class 38,2418,2449
+Breakfast.Eat_at_table,2450,2673
+Write,2674,2689
+Breakfast.Eat_at_table,2690,2801
+unknown class 38,2802,2817
+Breakfast.Eat_at_table,2818,2929
+unknown class 38,2930,2945
+Breakfast.Eat_at_table,2946,3041
+unknown class 38,3042,3057
+Breakfast.Eat_at_table,3058,3393
+unknown class 38,3394,3409
+Breakfast.Eat_at_table,3410,3985
+unknown class 38,3986,4001
+Breakfast.Eat_at_table,4002,4113
+unknown class 38,4114,4161
+Breakfast.Eat_at_table,4162,4209
+unknown class 38,4210,4273
+Breakfast.Eat_at_table,4274,4417
+unknown class 38,4418,4433
+Breakfast.Eat_at_table,4434,4465
+unknown class 38,4466,4481
+Breakfast.Eat_at_table,4482,4577
+Read,4578,4609
+Breakfast.Eat_at_table,4610,4689
+unknown class 38,4690,4705
+Breakfast.Eat_at_table,4706,4721
+unknown class 38,4722,4737
+Breakfast.Eat_at_table,4738,6097
+unknown class 37,6098,6113
+Breakfast.Eat_at_table,6114,6161
+unknown class 38,6162,6209
+Breakfast.Eat_at_table,6210,6225
+unknown class 38,6226,6241
+Breakfast.Eat_at_table,6242,6257
+Read,6258,6273
+Breakfast.Eat_at_table,6274,6289
+Read,6290,6881
+Breakfast.Eat_at_table,6882,6897
+Read,6898,6977
+unknown class 38,6978,6993
+Read,6994,7009
+unknown class 38,7010,7025
+Read,7026,7169
+Breakfast.Eat_at_table,7170,7185
+Read,7186,7201
+Breakfast.Eat_at_table,7202,7217
+Read,7218,7585
+Breakfast.Eat_at_table,7586,7649
+Read,7650,7713
+Breakfast.Eat_at_table,7714,7793
+Read,7794,7809
+Breakfast.Eat_at_table,7810,7825
+Read,7826,7841
+Breakfast.Eat_at_table,7842,7857
+unknown class 38,7858,7873
+Breakfast.Eat_at_table,7874,7921
+unknown class 38,7922,7969
+Breakfast.Eat_at_table,7970,8081
+Read,8082,8129
+Use_telephone,8130,8145
+Read,8146,8225
+Use_telephone,8226,8241
+Read,8242,8257
+Breakfast.Eat_at_table,8258,8273
+Drink.From_cup,8274,8353
+Put_something_on_table,8354,8401
+Read,8402,8417
+Use_telephone,8418,8433
+Read,8434,9089
+Drink.From_cup,9090,9185
+Put_something_on_table,9186,9233
+Drink.From_glass,9234,9249
+Sit_down,9250,9265
+Read,9266,9329
+Breakfast.Eat_at_table,9330,11457
+Read,11458,11569
+Breakfast.Eat_at_table,11570,11585
+Read,11586,11633
+unknown class 38,11634,11649
+Read,11650,11665
+Breakfast.Eat_at_table,11666,11681
+Read,11682,11697
+Breakfast.Eat_at_table,11698,11713
+Read,11714,11729
+Breakfast.Eat_at_table,11730,11777
+Read,11778,11825
+Breakfast.Eat_at_table,11826,11841
+Read,11842,11857
+Breakfast.Eat_at_table,11858,11873
+Read,11874,11889
+Breakfast.Eat_at_table,11890,12417
+unknown class 38,12418,12433
+Breakfast.Eat_at_table,12434,12465
+Read,12466,12481
+Breakfast.Eat_at_table,12482,12657
+Read,12658,12673
+Breakfast.Eat_at_table,12674,13217
+Use_telephone,13218,13233
+Breakfast.Eat_at_table,13234,13297
+unknown class 38,13298,13313
+Drink.From_cup,13314,13329
+unknown class 38,13330,13345
+Drink.From_cup,13346,13361
+Breakfast.Eat_at_table,13362,13793
+unknown class 38,13794,13809
+Drink.From_glass,13810,13825
+unknown class 38,13826,13857
+Breakfast.Eat_at_table,13858,13873
+Read,13874,13889
+Breakfast.Eat_at_table,13890,13937
+Drink.From_cup,13938,14065
+Read,14066,14113
+Drink.From_cup,14114,14209
+Read,14210,14305
+Breakfast.Eat_at_table,14306,14337
+unknown class 38,14338,14353
+Breakfast.Eat_at_table,14354,14449
+unknown class 38,14450,14465
+Drink.From_cup,14466,14481
+unknown class 38,14482,14497
+Drink.From_glass,14498,14529
+Put_something_on_table,14530,14545
+Breakfast.Eat_at_table,14546,14577
+unknown class 38,14578,14625
+Drink.From_cup,14626,14673
+Put_something_on_table,14674,14689
+unknown class 38,14690,14721
+Breakfast.Eat_at_table,14722,14769
+Drink.From_cup,14770,14785
+Breakfast.Eat_at_table,14786,14817
+Drink.From_cup,14818,14849
+Use_telephone,14850,14865
+Drink.From_cup,14866,15105
+Use_telephone,15106,15153
+Read,15154,15169
+Use_telephone,15170,15185
+Read,15186,15201
+Use_telephone,15202,15217
+Breakfast.Eat_at_table,15218,15233
+Use_telephone,15234,15265
+Drink.From_cup,15266,15281
+Read,15282,15297
+Drink.From_cup,15298,15377
+Put_something_on_table,15378,15393
+Use_telephone,15394,15409
+Read,15410,15425
+Use_telephone,15426,15441
+Read,15442,15457
+Use_telephone,15458,15473
+Breakfast.Eat_at_table,15474,15489
+Put_something_on_table,15490,15521
+Drink.From_glass,15522,15537
+Read,15538,15553
+Breakfast.Eat_at_table,15554,15601
+Read,15602,15617
+Breakfast.Eat_at_table,15618,15649
+Use_telephone,15650,15665
+Read,15666,15681
+Use_telephone,15682,15697
+Read,15698,15713
+Use_telephone,15714,15729
+Read,15730,15745
+Use_telephone,15746,15761
+Breakfast.Eat_at_table,15762,15777
+Use_telephone,15778,15793
+Read,15794,15809
+Use_telephone,15810,15825
+Read,15826,15841
+Use_telephone,15842,15857
+Read,15858,15905
+Use_telephone,15906,15921
+Read,15922,15937
+Use_telephone,15938,15953
+Read,15954,16065
+Use_telephone,16066,16081
+Read,16082,16561
+Breakfast.Eat_at_table,16562,16577
+Read,16578,16817
+unknown class 38,16818,16833
+Read,16834,16849
+Drink.From_cup,16850,16865
+Read,16866,16913
+Drink.From_cup,16914,17041
+Breakfast.Eat_at_table,17042,17153
+Drink.From_cup,17154,17537
+Use_telephone,17538,17553
+Breakfast.Eat_at_table,17554,17569
+Use_telephone,17570,17617
+Breakfast.Eat_at_table,17618,17665
+Use_telephone,17666,17713
+Breakfast.Eat_at_table,17714,17761
+Use_telephone,17762,17777
+Breakfast.Eat_at_table,17778,17793
+Drink.From_cup,17794,17809
+Breakfast.Eat_at_table,17810,17825
+Drink.From_cup,17826,17953
+Use_telephone,17954,17969
+Breakfast.Eat_at_table,17970,18049
+Drink.From_cup,18050,18225
+Read,18226,18273
+Put_something_on_table,18274,18289
+Drink.From_cup,18290,18305
+Put_something_on_table,18306,18321
+Drink.From_cup,18322,18337
+Put_something_on_table,18338,18353
+Read,18354,18529
+Use_telephone,18530,18545
+Read,18546,18561
+Use_telephone,18562,18577
+Read,18578,18593
+Use_telephone,18594,18609
+Read,18610,18689
+Get_up,18690,18737
+Walk,18738,18769
+Sit_down,18770,18849
+Read,18850,20897
+Drink.From_cup,20898,20913
+Read,20914,22481
+Walk,22482,22577
+Leave,22578,22665
