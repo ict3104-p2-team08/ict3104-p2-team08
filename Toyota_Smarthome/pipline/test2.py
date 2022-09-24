@@ -408,8 +408,8 @@ def create_caption_video(arrayWithCaptions):
                                 (0, 255, 0),
                                 2,
                                 cv2.LINE_4)
-            if i == int(annotated_csv[annotated_current_position][2]) and annotated_current_position < len(annotated_csv) - 1:
-                annotated_current_position += 1
+        if i >= int(annotated_csv[annotated_current_position][2]) and annotated_current_position < len(annotated_csv) - 1:
+            annotated_current_position += 1
 
 
 
