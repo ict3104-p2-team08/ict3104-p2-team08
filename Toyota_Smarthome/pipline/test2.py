@@ -6,6 +6,7 @@ import sys
 import torch
 import warnings
 import csv
+from tqdm import tqdm
 warnings.filterwarnings('ignore')
 
 def str2bool(v):
@@ -124,7 +125,7 @@ def load_data_rgb_skeleton(train_split, val_split, root_skeleton, root_rgb):
     return dataloaders, datasets
 
 activityList = ["Enter", "Walk", "Make_coffee.Get_water", "Make_tea/put something in sink", "unknown class 4", "Use_Drawer", "unknown class 6", "Use_telephone",
-       "Leave", "Put_something_on_table", "Drink.From_glass",  "unknown class 11",  "unknown class 12", "Drink.From_cup", "Dump_in_trash",  "Make_tea.Boil_water",
+       "Leave", "Put_something_on_table", "Drink.From_glass",  "Pour.From_kettle",  "unknown class 12", "Drink.From_cup", "Dump_in_trash",  "Make_tea.Boil_water",
        "Make_tea", "Use_cupboard",  "unknown class 18", "Read", "Drink.From_bottle", "Use_fridge", "Wipe_table/clean dish with water",  "unknown class 23",
         "Eat_snack", "Sit_down", "Watch_TV", "Use_laptop", "Get_up",  "Drink.From_bottle",  "unknown class 30",  "unknown class 31",
         "Lay_down",  "unknown class 33", "Write", "Breakfast", "unknown class 36", "unknown class 37", "unknown class 38",  "Breakfast.Cut_bread",
@@ -343,6 +344,7 @@ def create_caption_video(arrayWithCaptions):
     writer = cv2.VideoWriter('./Toyota_Smarthome/pipline/video_output/' + args.videofile + '_caption.mp4', apiPreference=0, fourcc=fourcc,
                              fps=video_fps[0], frameSize=(int(width), int(height)))
 
+    loop = tqdm(total=length, leave=False)
     i = 1 #frame counter
     counter = 0 #counter for arrayWithCaptions
     array_for_csv = []
@@ -411,7 +413,9 @@ def create_caption_video(arrayWithCaptions):
         if i >= int(annotated_csv[annotated_current_position][2]) and annotated_current_position < len(annotated_csv) - 1:
             annotated_current_position += 1
 
-
+        #show progress bar
+        loop.set_description("generating video...".format(i))
+        loop.update(1)
 
         i += 1
         # Display the resulting frame
