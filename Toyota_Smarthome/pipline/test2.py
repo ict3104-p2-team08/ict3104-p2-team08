@@ -124,13 +124,13 @@ def load_data_rgb_skeleton(train_split, val_split, root_skeleton, root_rgb):
     datasets = {'train': dataset, 'val': val_dataset}
     return dataloaders, datasets
 
-activityList = ["Enter", "Walk", "Make_coffee.Get_water", "Make_tea/put something in sink", "unknown class 4", "Use_Drawer", "unknown class 6", "Use_telephone",
-       "Leave", "Put_something_on_table", "Drink.From_glass",  "Pour.From_kettle",  "unknown class 12", "Drink.From_cup", "Dump_in_trash",  "Make_tea.Boil_water",
-       "Make_tea", "Use_cupboard",  "unknown class 18", "Read", "Drink.From_bottle", "Use_fridge", "Wipe_table/clean dish with water",  "unknown class 23",
-        "Eat_snack", "Sit_down", "Watch_TV", "Use_laptop", "Get_up",  "Drink.From_bottle",  "unknown class 30",  "unknown class 31",
-        "Lay_down",  "unknown class 33", "Write", "Breakfast", "unknown class 36", "unknown class 37", "unknown class 38",  "Breakfast.Cut_bread",
-        "Clean_dishes.Dry_up", "unknown class 41", "Cook.Use_stove",  "Cook.Cut",  "unknown class 44", "Cook.Stir", "Cook.Use_oven", "like uselaptop",
-       "unknown class 48",  "unknown class 49", "unknown class 50"]
+activityList = ["Enter", "Walk", "Make_coffee.Get_water", "put something in sink", "add_water_to_coffee_machine", "Use_Drawer", "stir_coffee/tea", "Use_telephone",
+       "Leave", "Put_something_on_table", "Drink.From_glass",  "Pour.From_kettle",  "Pour.Coffee_grain", "Drink.From_cup", "Dump_in_trash",  "Make_tea.Boil_water",
+       "Make_tea", "Use_cupboard",  "Make_tea.Insert_tea_bag", "Read", "Drink.From_bottle", "Use_fridge", "Wipe_table",  "Take_pills",
+        "Eat_snack", "Sit_down", "Watch_TV", "Use_laptop", "Get_up",  "Pour.From_bottle",  "Take_something_off_table",  "Pour.from_can",
+        "Lay_down",  "Use_glasses", "Write", "Breakfast", "Breakfast.Spread_butter", "Breakfast.Take_ham", "Drink.From_can",  "Breakfast.Cut_bread",
+        "Clean_dishes.Dry_up", "Clean_dishes.Clean_with_water", "Cook.Use_stove",  "Cook.Cut",  "unknown class 44", "Cook.Stir", "Cook.Use_oven", "use_Tablet",
+       "",  "", ""]
 
 #self declared (essentially works same as run() method)
 def val_file(models, num_epochs=50):

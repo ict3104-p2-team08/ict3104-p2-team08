@@ -135,6 +135,7 @@ def val_file(models, num_epochs=50):
     probs = []
     for model, gpu, dataloader, optimizer, sched, model_file in models:
         prob_val, val_loss, val_map = val_step(model, gpu, dataloader['val'], 0)
+
         probs.append(prob_val)
         sched.step(val_loss)
 
