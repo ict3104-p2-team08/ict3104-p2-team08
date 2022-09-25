@@ -41,6 +41,7 @@ parser.add_argument('-kernelsize', type=str, default='False')
 parser.add_argument('-feat', type=str, default='False')
 parser.add_argument('-split_setting', type=str, default='CS')
 parser.add_argument('-videofile', type=str)
+parser.add_argument('-name', type=str)
 args = parser.parse_args()
 
 import torch
@@ -101,6 +102,11 @@ if args.dataset == 'TSU':
     rgb_root = './Toyota_Smarthome/pipline/data/RGB_i3d_16frames_64000_SSD'
     skeleton_root = '/skeleton/feat/Path/'  #
 
+    if args.model != "PDAN":
+        train_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
+        test_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
+
+
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
@@ -140,6 +146,7 @@ def val_file(models, num_epochs=50):
         probs.append(prob_val)
         sched.step(val_loss)
 
+        #print("keys in prob_val: ", prob_val.keys())
         arrayForMaxAndIndex = []
         for index in range(len(prob_val.get(args.videofile)[1])):
             # get the highest prob class at each frame from 51 class

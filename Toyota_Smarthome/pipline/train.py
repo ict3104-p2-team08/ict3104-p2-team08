@@ -32,11 +32,13 @@ parser.add_argument('-model', type=str, default='PDAN')  # change default from "
 parser.add_argument('-APtype', type=str, default='map') #change default from "wap" to "map"
 parser.add_argument('-randomseed', type=str, default='False')
 parser.add_argument('-load_model', type=str, default='False') #change default from "False" to "True"
-parser.add_argument('-num_channel', type=str, default='2') # change default from "False" to "2" (just random no idea why 2)
+parser.add_argument('-num_channel', type=str, default='3') # change default from "False" to "2" (just random no idea why 2)
 parser.add_argument('-batch_size', type=str, default='1') # change default from "False" to "1"
 parser.add_argument('-kernelsize', type=str, default='False')
 parser.add_argument('-feat', type=str, default='False')
 parser.add_argument('-split_setting', type=str, default='CS')
+parser.add_argument('-video_train_test', type=str)
+parser.add_argument('-name', type=str)
 args = parser.parse_args()
 
 import torch
@@ -77,6 +79,7 @@ if str(args.APtype) == 'map':
 
 batch_size = int(args.batch_size)
 
+
 if args.dataset == 'TSU':
     split_setting = str(args.split_setting)
 
@@ -87,15 +90,16 @@ if args.dataset == 'TSU':
     classes = 51
 
     if split_setting == 'CS':
-        train_split = './data/smarthome_CS_51.json'
-        test_split = './data/smarthome_CS_51.json'
+        train_split = './Toyota_Smarthome/pipline/data/smarthome_CS_51.json'
+        test_split = './Toyota_Smarthome/pipline/data/smarthome_CS_51.json'
 
     elif split_setting == 'CV':
-        train_split = './data/smarthome_CV_51.json'
-        test_split = './data/smarthome_CV_51.json'
+        train_split = './Toyota_Smarthome/pipline/data/smarthome_CV_51.json'
+        test_split = './Toyota_Smarthome/pipline/data/smarthome_CV_51.json'
 
-    rgb_root = './data/RGB_i3d_16frames_64000_SSD'
+    rgb_root = './Toyota_Smarthome/pipline/data/RGB_i3d_16frames_64000_SSD'
     skeleton_root = '/skeleton/feat/Path/'  #
+
 
 
 def sigmoid(x):
@@ -149,6 +153,7 @@ def load_data(train_split, val_split, root):
 def run(models, criterion, num_epochs=50):
     since = time.time()
 
+    bestModel = None
     best_map = 0.0
     for epoch in range(num_epochs):
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
@@ -163,10 +168,12 @@ def run(models, criterion, num_epochs=50):
 
             if best_map < val_map:
                 best_map = val_map
-                torch.save(model.state_dict(),
-                           './' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
-                torch.save(model, './' + str(args.model) + '/model_epoch_' + str(args.lr) + '_' + str(epoch))
-                print('save here:', './' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
+                bestModel = model
+                #torch.save(model.state_dict(),
+                           #'./Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
+                #torch.save(model, './Toyota_Smarthome/pipline/' + str(args.model) + '/model_epoch_' + str(args.lr) + '_' + str(epoch))
+                #print('save here:', './Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
+    torch.save(bestModel, './Toyota_Smarthome/pipline/models/' + str(args.name))
 
 
 def eval_model(model, dataloader, baseline=False):
@@ -280,10 +287,38 @@ def val_step(model, gpu, dataloader, epoch):
     return full_probs, epoch_loss, val_map
 
 
+def filter_json_file(list_to_filter):
+    f = open(test_split)
+    print(list_to_filter)
+    data = json.load(f)
+    dict_you_want = {your_key: data[your_key] for your_key in list_to_filter}
+    with open("./Toyota_Smarthome/pipline/data/" + args.name + "_CS.json", "w") as f:
+        json.dump(dict_you_want, f)
+    testable_videos = []
+    for video_key, video_values in dict_you_want.items():
+        if video_values["subset"] == "testing":
+            testable_videos.append(video_key)
+    json_to_save = {args.name: testable_videos}
+    print(json_to_save)
+    with open("./Toyota_Smarthome/pipline/model_videos.json") as outfile:
+        data = json.load(outfile)
+    data.update(json_to_save)
+
+    with open("./Toyota_Smarthome/pipline/model_videos.json", 'w') as outfile:
+        json.dump(data, outfile)
+
+
 if __name__ == '__main__':
     print(str(args.model))
     print('batch_size:', batch_size)
     print('cuda_avail', torch.cuda.is_available())
+
+    video_list = args.video_train_test.split(",")
+
+    filter_json_file(video_list)
+
+    train_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
+    train_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
 
     if args.mode == 'flow':
         pass  # ownself added this line to prevent error
@@ -306,7 +341,12 @@ if __name__ == '__main__':
         num_classes = classes
         mid_channel = int(args.num_channel)
 
-        if args.model == "PDAN":
+        if args.model == "SSPDAN":
+            print("you are processing SSPDAN")
+            from models import SSPDAN as Net
+
+            model = Net(num_layers=5, num_f_maps=mid_channel, dim=input_channnel, num_classes=classes)
+        else:
             print("you are processing PDAN")
             from models import PDAN as Net
 
