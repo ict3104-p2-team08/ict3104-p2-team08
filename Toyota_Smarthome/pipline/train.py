@@ -4,7 +4,9 @@ import os
 import argparse
 import sys
 import torch
-
+import warnings
+from tqdm import tqdm
+warnings.filterwarnings('ignore')
 
 def str2bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -155,9 +157,10 @@ def run(models, criterion, num_epochs=50):
 
     bestModel = None
     best_map = 0.0
+    loop = tqdm(total=num_epochs, leave=False)
     for epoch in range(num_epochs):
-        print('Epoch {}/{}'.format(epoch, num_epochs - 1))
-        print('-' * 10)
+        #print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        #print('-' * 10)
 
         probs = []
         for model, gpu, dataloader, optimizer, sched, model_file in models:
@@ -173,7 +176,12 @@ def run(models, criterion, num_epochs=50):
                            #'./Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
                 #torch.save(model, './Toyota_Smarthome/pipline/' + str(args.model) + '/model_epoch_' + str(args.lr) + '_' + str(epoch))
                 #print('save here:', './Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
+
+        #show progress bar
+        loop.set_description("training..".format(i))
+        loop.update(1)
     torch.save(bestModel, './Toyota_Smarthome/pipline/models/' + str(args.name))
+    print("Completed")
 
 
 def eval_model(model, dataloader, baseline=False):
@@ -243,7 +251,7 @@ def train_step(model, gpu, optimizer, dataloader, epoch):
         train_map = 100 * apm.value()
     else:
         train_map = 100 * apm.value().mean()
-    print('train-map:', train_map)
+    #print('train-map:', train_map)
     apm.reset()
 
     epoch_loss = tot_loss / num_iter
@@ -280,8 +288,8 @@ def val_step(model, gpu, dataloader, epoch):
     epoch_loss = tot_loss / num_iter
 
     val_map = torch.sum(100 * apm.value()) / torch.nonzero(100 * apm.value()).size()[0]
-    print('val-map:', val_map)
-    print(100 * apm.value())
+    #print('val-map:', val_map)
+    #print(100 * apm.value())
     apm.reset()
 
     return full_probs, epoch_loss, val_map

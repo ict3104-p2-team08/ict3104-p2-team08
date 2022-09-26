@@ -416,7 +416,7 @@ if __name__ == '__main__':
 
         if args.model == "PDAN":
             print("you are processing PDAN")
-            from models import PDAN as Net
+            from models.py import PDAN as Net
 
             model = Net(num_stages=1, num_layers=5, num_f_maps=mid_channel, dim=input_channnel, num_classes=classes)
 
