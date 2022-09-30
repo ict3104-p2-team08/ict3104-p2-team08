@@ -1,2 +1,6 @@
 event,start_frame,end_frame
-Read,0,770
+Wipe_table,0,103
+,104,171
+Wipe_table,172,205
+,206,647
+Wipe_table,648,770

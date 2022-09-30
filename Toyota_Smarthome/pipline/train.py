@@ -6,7 +6,9 @@ import sys
 import torch
 import warnings
 from tqdm import tqdm
+
 warnings.filterwarnings('ignore')
+
 
 def str2bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -18,24 +20,25 @@ def str2bool(v):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-mode', type=str, help='rgb or flow (or joint for eval)', default='rgb') #added default parameter
+parser.add_argument('-mode', type=str, help='rgb or flow (or joint for eval)', default='rgb')  # added default parameter
 parser.add_argument('-train', type=str2bool, default='True', help='train or eval')
 parser.add_argument('-comp_info', type=str)
 parser.add_argument('-rgb_model_file', type=str)
 parser.add_argument('-flow_model_file', type=str)
 parser.add_argument('-gpu', type=str, default='4')
-parser.add_argument('-dataset', type=str, default='TSU') #change default from "charades" to "TSU"
+parser.add_argument('-dataset', type=str, default='TSU')  # change default from "charades" to "TSU"
 parser.add_argument('-rgb_root', type=str, default='no_root')
 parser.add_argument('-flow_root', type=str, default='no_root')
 parser.add_argument('-type', type=str, default='original')
 parser.add_argument('-lr', type=str, default='0.1')
-parser.add_argument('-epoch', type=str, default='50') #change default from "50" to "50"
+parser.add_argument('-epoch', type=str, default='50')  # change default from "50" to "50"
 parser.add_argument('-model', type=str, default='PDAN')  # change default from "" to "PDAN"
-parser.add_argument('-APtype', type=str, default='map') #change default from "wap" to "map"
+parser.add_argument('-APtype', type=str, default='map')  # change default from "wap" to "map"
 parser.add_argument('-randomseed', type=str, default='False')
-parser.add_argument('-load_model', type=str, default='False') #change default from "False" to "True"
-parser.add_argument('-num_channel', type=str, default='3') # change default from "False" to "2" (just random no idea why 2)
-parser.add_argument('-batch_size', type=str, default='1') # change default from "False" to "1"
+parser.add_argument('-load_model', type=str, default='False')  # change default from "False" to "True"
+parser.add_argument('-num_channel', type=str,
+                    default='3')  # change default from "False" to "2" (just random no idea why 2)
+parser.add_argument('-batch_size', type=str, default='1')  # change default from "False" to "1"
 parser.add_argument('-kernelsize', type=str, default='False')
 parser.add_argument('-feat', type=str, default='False')
 parser.add_argument('-split_setting', type=str, default='CS')
@@ -81,13 +84,11 @@ if str(args.APtype) == 'map':
 
 batch_size = int(args.batch_size)
 
-
 if args.dataset == 'TSU':
     split_setting = str(args.split_setting)
 
     from smarthome_i3d_per_video import TSU as Dataset
     from smarthome_i3d_per_video import TSU_collate_fn as collate_fn
-
 
     classes = 51
 
@@ -99,9 +100,9 @@ if args.dataset == 'TSU':
         train_split = './Toyota_Smarthome/pipline/data/smarthome_CV_51.json'
         test_split = './Toyota_Smarthome/pipline/data/smarthome_CV_51.json'
 
-    rgb_root = './Toyota_Smarthome/pipline/data/RGB_i3d_16frames_64000_SSD'
+    #rgb_root = './Toyota_Smarthome/pipline/data/RGB_i3d_16frames_64000_SSD'
+    rgb_root = './Toyota_Smarthome/pipline/data/RGB_v_iashin'
     skeleton_root = '/skeleton/feat/Path/'  #
-
 
 
 def sigmoid(x):
@@ -159,8 +160,8 @@ def run(models, criterion, num_epochs=50):
     best_map = 0.0
     loop = tqdm(total=num_epochs, leave=False)
     for epoch in range(num_epochs):
-        #print('Epoch {}/{}'.format(epoch, num_epochs - 1))
-        #print('-' * 10)
+        # print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        # print('-' * 10)
 
         probs = []
         for model, gpu, dataloader, optimizer, sched, model_file in models:
@@ -172,13 +173,13 @@ def run(models, criterion, num_epochs=50):
             if best_map < val_map:
                 best_map = val_map
                 bestModel = model
-                #torch.save(model.state_dict(),
-                           #'./Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
-                #torch.save(model, './Toyota_Smarthome/pipline/' + str(args.model) + '/model_epoch_' + str(args.lr) + '_' + str(epoch))
-                #print('save here:', './Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
+                # torch.save(model.state_dict(),
+                # './Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
+                # torch.save(model, './Toyota_Smarthome/pipline/' + str(args.model) + '/model_epoch_' + str(args.lr) + '_' + str(epoch))
+                # print('save here:', './Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
 
-        #show progress bar
-        loop.set_description("training..".format(i))
+        # show progress bar
+        loop.set_description("training..")
         loop.update(1)
     torch.save(bestModel, './Toyota_Smarthome/pipline/models/' + str(args.name))
     print("Completed")
@@ -251,7 +252,7 @@ def train_step(model, gpu, optimizer, dataloader, epoch):
         train_map = 100 * apm.value()
     else:
         train_map = 100 * apm.value().mean()
-    #print('train-map:', train_map)
+    # print('train-map:', train_map)
     apm.reset()
 
     epoch_loss = tot_loss / num_iter
@@ -288,8 +289,8 @@ def val_step(model, gpu, dataloader, epoch):
     epoch_loss = tot_loss / num_iter
 
     val_map = torch.sum(100 * apm.value()) / torch.nonzero(100 * apm.value()).size()[0]
-    #print('val-map:', val_map)
-    #print(100 * apm.value())
+    # print('val-map:', val_map)
+    # print(100 * apm.value())
     apm.reset()
 
     return full_probs, epoch_loss, val_map
@@ -299,21 +300,9 @@ def filter_json_file(list_to_filter):
     f = open(test_split)
     print(list_to_filter)
     data = json.load(f)
-    dict_you_want = {your_key: data[your_key] for your_key in list_to_filter}
+    dict_you_want = {your_key + "_rgb": data[your_key] for your_key in list_to_filter}
     with open("./Toyota_Smarthome/pipline/data/" + args.name + "_CS.json", "w") as f:
         json.dump(dict_you_want, f)
-    testable_videos = []
-    for video_key, video_values in dict_you_want.items():
-        if video_values["subset"] == "testing":
-            testable_videos.append(video_key)
-    json_to_save = {args.name: testable_videos}
-    print(json_to_save)
-    with open("./Toyota_Smarthome/pipline/model_videos.json") as outfile:
-        data = json.load(outfile)
-    data.update(json_to_save)
-
-    with open("./Toyota_Smarthome/pipline/model_videos.json", 'w') as outfile:
-        json.dump(data, outfile)
 
 
 if __name__ == '__main__':
@@ -326,7 +315,7 @@ if __name__ == '__main__':
     filter_json_file(video_list)
 
     train_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
-    train_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
+    test_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
 
     if args.mode == 'flow':
         pass  # ownself added this line to prevent error

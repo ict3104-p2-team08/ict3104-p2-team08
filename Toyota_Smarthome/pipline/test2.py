@@ -102,9 +102,12 @@ if args.dataset == 'TSU':
     rgb_root = './Toyota_Smarthome/pipline/data/RGB_i3d_16frames_64000_SSD'
     skeleton_root = '/skeleton/feat/Path/'  #
 
-    if args.model != "PDAN":
-        train_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
-        test_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
+    if args.name != "PDAN":
+        train_split = './Toyota_Smarthome/pipline/data/new.json'
+        test_split = './Toyota_Smarthome/pipline/data/new.json'
+        #train_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
+        #test_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
+        rgb_root = './Toyota_Smarthome/pipline/data/RGB_v_iashin'
 
 
 def sigmoid(x):
@@ -148,6 +151,7 @@ def val_file(models, num_epochs=50):
 
         #print("keys in prob_val: ", prob_val.keys())
         arrayForMaxAndIndex = []
+        print(prob_val.keys())
         for index in range(len(prob_val.get(args.videofile)[1])):
             # get the highest prob class at each frame from 51 class
             activityAtEachFrameArray = []
@@ -338,7 +342,8 @@ def val_step(model, gpu, dataloader, epoch):
 
 def create_caption_video(arrayWithCaptions):
     import cv2
-    cap = cv2.VideoCapture('./data/input_files/' + args.videofile + ".mp4")
+    videofile = args.videofile.replace('_rgb', '')
+    cap = cv2.VideoCapture('./data/input_files/' + videofile + ".mp4")
 
     length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     numberOfFramePerCaption = math.ceil(length / len(arrayWithCaptions))
@@ -463,7 +468,8 @@ def generateCSV(arrayForCSV):
         writer.writerows(arrayForCSV)
 
 def readCSV():
-    filePath = "./data/input_csv/" + args.videofile + ".csv"
+    videofile = args.videofile.replace('_rgb', '')
+    filePath = "./data/input_csv/" + videofile + ".csv"
     with open(filePath, newline='') as f:
         reader = csv.reader(f)
         data = list(reader)
