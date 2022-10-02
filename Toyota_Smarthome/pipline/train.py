@@ -100,9 +100,10 @@ if args.dataset == 'TSU':
         train_split = './Toyota_Smarthome/pipline/data/smarthome_CV_51.json'
         test_split = './Toyota_Smarthome/pipline/data/smarthome_CV_51.json'
 
-    #rgb_root = './Toyota_Smarthome/pipline/data/RGB_i3d_16frames_64000_SSD'
-    rgb_root = './Toyota_Smarthome/pipline/data/RGB_v_iashin'
+    rgb_root = './Toyota_Smarthome/pipline/data/RGB_i3d_16frames_64000_SSD'
     skeleton_root = '/skeleton/feat/Path/'  #
+
+    rgb_root = './Toyota_Smarthome/pipline/data/RGB_v_iashin'
 
 
 def sigmoid(x):
@@ -123,6 +124,29 @@ def load_data_rgb_skeleton(train_split, val_split, root_skeleton, root_rgb):
     val_dataset = Dataset(val_split, 'testing', root_skeleton, root_rgb, batch_size, classes)
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=0,
                                                  pin_memory=True, collate_fn=collate_fn)  # 2
+
+    dataloaders = {'train': dataloader, 'val': val_dataloader}
+    datasets = {'train': dataset, 'val': val_dataset}
+    return dataloaders, datasets
+
+
+def load_data_rgb(train_split, val_split, root):
+    # Load rgb Data
+
+    if len(train_split) > 0:
+        dataset = Dataset(train_split, 'training', root, batch_size, classes)
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0,
+                                                 pin_memory=True, collate_fn=collate_fn)
+        dataloader.root = root
+    else:
+
+        dataset = None
+        dataloader = None
+
+    val_dataset = Dataset(val_split, 'testing', root, batch_size, classes)
+    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=0,
+                                                 pin_memory=True, collate_fn=collate_fn)
+    val_dataloader.root = root
 
     dataloaders = {'train': dataloader, 'val': val_dataloader}
     datasets = {'train': dataset, 'val': val_dataset}
@@ -162,7 +186,6 @@ def run(models, criterion, num_epochs=50):
     for epoch in range(num_epochs):
         # print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         # print('-' * 10)
-
         probs = []
         for model, gpu, dataloader, optimizer, sched, model_file in models:
             train_map, train_loss = train_step(model, gpu, optimizer, dataloader['train'], epoch)
@@ -315,7 +338,7 @@ if __name__ == '__main__':
     filter_json_file(video_list)
 
     train_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
-    test_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
+    test_split = './Toyota_Smarthome/pipline/data/i3d_CS.json'
 
     if args.mode == 'flow':
         pass  # ownself added this line to prevent error
@@ -326,7 +349,8 @@ if __name__ == '__main__':
         dataloaders, datasets = load_data(train_split, test_split, skeleton_root)
     elif args.mode == 'rgb':
         print('RGB mode', rgb_root)
-        dataloaders, datasets = load_data(train_split, test_split, rgb_root)
+        #dataloaders, datasets = load_data(train_split, test_split, rgb_root)
+        dataloaders, datasets = load_data_rgb(train_split, test_split, rgb_root)
 
     if args.train:
         num_channel = args.num_channel

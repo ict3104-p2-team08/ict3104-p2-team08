@@ -103,10 +103,8 @@ if args.dataset == 'TSU':
     skeleton_root = '/skeleton/feat/Path/'  #
 
     if args.name != "PDAN":
-        train_split = './Toyota_Smarthome/pipline/data/new.json'
-        test_split = './Toyota_Smarthome/pipline/data/new.json'
-        #train_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
-        #test_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
+        train_split = './Toyota_Smarthome/pipline/data/i3d_CS.json'
+        test_split = './Toyota_Smarthome/pipline/data/i3d_CS.json'
         rgb_root = './Toyota_Smarthome/pipline/data/RGB_v_iashin'
 
 
@@ -163,6 +161,28 @@ def val_file(models, num_epochs=50):
         create_caption_video(arrayForMaxAndIndex)
         #print("array for both max and index: ", arrayForMaxAndIndex)
 
+
+def load_data_rgb(train_split, val_split, root):
+    # Load Data
+
+    if len(train_split) > 0:
+        dataset = Dataset(train_split, 'training', root, batch_size, classes)
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0,
+                                                 pin_memory=True, collate_fn=collate_fn)
+        dataloader.root = root
+    else:
+
+        dataset = None
+        dataloader = None
+
+    val_dataset = Dataset(val_split, 'testing', root, batch_size, classes)
+    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=0,
+                                                 pin_memory=True, collate_fn=collate_fn)
+    val_dataloader.root = root
+
+    dataloaders = {'train': dataloader, 'val': val_dataloader}
+    datasets = {'train': dataset, 'val': val_dataset}
+    return dataloaders, datasets
 
 
 def load_data(train_split, val_split, root):
@@ -492,7 +512,8 @@ if __name__ == '__main__':
         dataloaders, datasets = load_data(train_split, test_split, skeleton_root)
     elif args.mode == 'rgb':
         #print('RGB mode', rgb_root)
-        dataloaders, datasets = load_data(train_split, test_split, rgb_root)
+        #dataloaders, datasets = load_data(train_split, test_split, rgb_root)
+        dataloaders, datasets = load_data_rgb(train_split, test_split, rgb_root)
 
     if not args.train:
         num_channel = args.num_channel

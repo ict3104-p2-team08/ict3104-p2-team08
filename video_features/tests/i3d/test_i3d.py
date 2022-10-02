@@ -5,7 +5,7 @@ import pytest
 
 sys.path.insert(0, '.')  # nopep8
 
-from models.i3d.extract_i3d import ExtractI3D as Extractor
+from models2.i3d.extract_i3d import ExtractI3D as Extractor
 from tests.utils import base_test_script
 
 # a bit ugly but it assumes the features being tested has the same folder name,

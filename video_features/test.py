@@ -1,47 +1,90 @@
 #import sys
 #sys.path.append('../')
 from utils.utils import build_cfg_path
-from models.i3d.extract_i3d import ExtractI3D
+from models2.i3d.extract_i3d import ExtractI3D
 from omegaconf import OmegaConf
 import numpy as np
+import argparse
+import json
 import torch
 
-# Select the feature type
-feature_type = 'i3d'
-args = OmegaConf.load(build_cfg_path(feature_type))
-args.video_paths = ["../data/input_files/P03T10C01.mp4"]
-args.flow_type = 'raft'
-args.stack_size = 32
+parser = argparse.ArgumentParser()
+parser.add_argument('-videosToExtract', type=str)
+args = parser.parse_args()
 
-extractor = ExtractI3D(args)
+rgb_viashin_path = '../Toyota_Smarthome/pipline/data/i3d_CS.json'
+smarthome_cs_path = '../Toyota_Smarthome/pipline/data/smarthome_CS_51.json'
 
-# Extract features
-for video_path in args.video_paths:
-    print(f'Extracting for {video_path}')
-    feature_dict = extractor.extract(video_path)
-    [(print(k), print(v.shape), print(v)) for k, v in feature_dict.items()]
+if __name__ == '__main__':
+    print("checking for select video's npy")
+    video_list = args.videosToExtract.split(",")
+    new_video_list = [video + "_rgb" for video in video_list]
+    video_to_extract = []
+    print(new_video_list)
+    f = open(rgb_viashin_path)
+    rgb_viashin_json = json.load(f)
+    # get videos with feature not extracted before
+    for each_video in new_video_list:
+        if each_video not in rgb_viashin_json.keys():
+            video_to_extract.append(each_video)
+    # get values from smarthome_cs_json base on videos not extracted
+    video_to_extract_without_rgb_substring = []
+    for video in video_to_extract:
+        video_to_extract_without_rgb_substring.append(video.replace("_rgb", ""))
+    f = open(smarthome_cs_path)
+    smarthome_cs_json = json.load(f)
+    dict_you_want = {your_key + "_rgb": smarthome_cs_json[your_key] for your_key in video_to_extract_without_rgb_substring}
 
-    rgb = list(feature_dict.items())[0]
-    flow = list(feature_dict.items())[1]
+    # Select the feature type
+    feature_type = 'i3d'
+    args = OmegaConf.load(build_cfg_path(feature_type))
+    args.flow_type = 'raft'
+    args.streams = 'rgb'
+    args.stack_size = 64
+    args.step_size = 64
 
-    rgb_dict = {rgb[0]: rgb[1]}
-    #flow_dict = {flow[0]: flow[1]}
-    #rgb_flow_dict = {rgb[0]: rgb[1], flow[0]: flow[1]}
+    extractor = ExtractI3D(args)
 
-    #rgb .npy
-    np.save(video_path.replace('../data/input_files/', '')[:-4]  + "_rgb.npy", rgb[1])
+    # Extract features
+    for video in video_to_extract_without_rgb_substring:
+        print(video + "_rgb.mp4 npy file does not exist")
+        video = video + ".mp4"
+        print(f'Extracting for {video}')
+        feature_dict = extractor.extract("../data/input_files/" + video)
+        [(print(k), print(v.shape), print(v)) for k, v in feature_dict.items()]
 
-    #flow .npy
-    #np.save('P02T03C03' + "_flow.npy", flow_dict)
+        # derive rgb, flow, rgb+flow dict
+        rgb = list(feature_dict.items())[0]
+        #flow = list(feature_dict.items())[1]
 
-    #rgb_flow .npy
-    #np.save('P02T03C03' + "_rgb_flow.npy", rgb_flow_dict)
+        rgb_dict = {rgb[0]: rgb[1]}
+        #flow_dict = {flow[0]: flow[1]}
+        #rgb_flow_dict = {rgb[0]: rgb[1], flow[0]: flow[1]}
 
-    rbg_test =np.load(video_path.replace('../data/input_files/', '')[:-4] + "_rgb.npy", allow_pickle= True)
-    #flow_test =np.load("P02T03C03_flow.npy", allow_pickle= True)
-    #rbg_flow_test =np.load("P02T03C03_rgb_flow.npy", allow_pickle= True)
+        # rgb .npy
+        data = np.expand_dims(rgb[1], axis=(2, 1)) # unsqueeze data to fit orig
+        np.save("../Toyota_Smarthome/pipline/data/RGB_v_iashin/" + video[:-4] + "_rgb.npy", data)
 
+        # flow .npy
+        #np.save(w.value[:-4] + "_flow.npy", flow_dict)
 
-    print("rgb_test: ", rbg_test)
-    #print(flow_test)
-    #print(rbg_flow_test)
+        # rgb_flow .npy
+        #np.save(w.value[:-4] + "_rgb_flow.npy", rgb_flow_dict)
+
+        # check if .npy load
+        #rbg_test = np.load(video + "_rgb.npy", allow_pickle=True)
+        #flow_test = np.load("P02T03C03_flow.npy", allow_pickle=True)
+        #rbg_flow_test = np.load("P02T03C03_rgb_flow.npy", allow_pickle=True)
+
+        #print(rbg_test)
+        #print(flow_test)
+        #print(rbg_flow_test)
+
+    with open(rgb_viashin_path) as outfile:
+        data = json.load(outfile)
+    data.update(dict_you_want)
+
+    with open(rgb_viashin_path, 'w') as outfile:
+        json.dump(data, outfile)
+
+    print("done extraction")
