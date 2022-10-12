@@ -131,13 +131,13 @@ def load_data_rgb_skeleton(train_split, val_split, root_skeleton, root_rgb):
     datasets = {'train': dataset, 'val': val_dataset}
     return dataloaders, datasets
 
-activityList = ["Enter", "Walk", "Make_coffee.Get_water", "put something in sink", "add_water_to_coffee_machine", "Use_Drawer", "stir_coffee/tea", "Use_telephone",
-       "Leave", "Put_something_on_table", "Drink.From_glass",  "Pour.From_kettle",  "Pour.Coffee_grain", "Drink.From_cup", "Dump_in_trash",  "Make_tea.Boil_water",
-       "Make_tea", "Use_cupboard",  "Make_tea.Insert_tea_bag", "Read", "Drink.From_bottle", "Use_fridge", "Wipe_table",  "Take_pills",
-        "Eat_snack", "Sit_down", "Watch_TV", "Use_laptop", "Get_up",  "Pour.From_bottle",  "Take_something_off_table",  "Pour.from_can",
-        "Lay_down",  "Use_glasses", "Write", "Breakfast", "Breakfast.Spread_butter", "Breakfast.Take_ham", "Drink.From_can",  "Breakfast.Cut_bread",
-        "Clean_dishes.Dry_up", "Clean_dishes.Clean_with_water", "Cook.Use_stove",  "Cook.Cut",  "unknown class 44", "Cook.Stir", "Cook.Use_oven", "use_Tablet",
-       "",  "", ""]
+activityList = ["Enter", "Walk", "Make_coffee", "Get_water", "Make_coffee", "Use_Drawer", "Make_coffee.Pour_grains", "Use_telephone",
+       "Leave", "Put_something_on_table", "Take_something_off_table",  "Pour.From_kettle",  "Stir_coffee/tea", "Drink.From_cup", "Dump_in_trash",  "Make_tea",
+       "Make_tea.Boil_water", "Use_cupboard",  "Make_tea.Insert_tea_bag", "Read", "Take_pills", "Use_fridge", "Clean_dishes",  "Clean_dishes.Put_something_in_sink",
+        "Eat_snack", "Sit_down", "Watch_TV", "Use_laptop", "Get_up",  "Drink.From_bottle",  "Pour.From_bottle",  "Drink.From_glass",
+        "Lay_down",  "Drink.From_can", "Write", "Breakfast", "Breakfast.Spread_jam_or_butter", "Breakfast.Cut_bread", "Breakfast.Eat_at_table",  "Breakfast.Take_ham",
+        "Clean_dishes.Dry_up", "Wipe_table", "Cook",  "Cook.Cut",  "Cook.Use_stove", "Cook.Stir", "Cook.Use_oven", "Clean_dishes.Clean_with_water",
+       "Use_tablet",  "Use_glasses", "Pour.From_can"]
 
 #self declared (essentially works same as run() method)
 def val_file(models, num_epochs=50):
@@ -149,7 +149,6 @@ def val_file(models, num_epochs=50):
 
         #print("keys in prob_val: ", prob_val.keys())
         arrayForMaxAndIndex = []
-        print(prob_val.keys())
         for index in range(len(prob_val.get(args.videofile)[1])):
             # get the highest prob class at each frame from 51 class
             activityAtEachFrameArray = []
@@ -157,6 +156,8 @@ def val_file(models, num_epochs=50):
                 activityAtEachFrameArray.append(prob_val.get(args.videofile)[index1][index])
             maxValue = max(activityAtEachFrameArray)
             indexOfMaxValue = activityAtEachFrameArray.index(maxValue)
+            # round confident to 2 decimal place
+            maxValue = round(maxValue, 2)
             arrayForMaxAndIndex.append([activityList[indexOfMaxValue], maxValue])
         create_caption_video(arrayForMaxAndIndex)
         #print("array for both max and index: ", arrayForMaxAndIndex)
@@ -432,6 +433,9 @@ def create_caption_video(arrayWithCaptions):
                         (0, 255, 0),
                         2,
                         cv2.LINE_4)
+            # write confident rate if caption predicted matches annotated caption
+            if caption == caption1:
+                cv2.putText(frame, str(arrayWithCaptions[counter][1]), (600, 20), font, 0.5, (0, 255, 0), 2, cv2.LINE_4)
             if annotated_current_position < len(annotated_csv) - 1:
                 if int(annotated_csv[annotated_current_position + 1][1]) <= i <= int(annotated_csv[annotated_current_position + 1][2]):
                     caption2 = annotated_csv[annotated_current_position + 1][0]
@@ -442,6 +446,12 @@ def create_caption_video(arrayWithCaptions):
                                 (0, 255, 0),
                                 2,
                                 cv2.LINE_4)
+
+                    # write confident rate if caption predicted matches annotated caption
+                    if caption == caption2:
+                        cv2.putText(frame, str(arrayWithCaptions[counter][1]), (600, 20), font, 0.5, (0, 255, 0), 2,
+                                    cv2.LINE_4)
+
         if i >= int(annotated_csv[annotated_current_position][2]) and annotated_current_position < len(annotated_csv) - 1:
             annotated_current_position += 1
 
