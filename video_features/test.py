@@ -49,6 +49,15 @@ if __name__ == '__main__':
     for video in video_to_extract_without_rgb_substring:
         print(video + "_rgb.mp4 npy file does not exist")
         video = video + ".mp4"
+
+        # check if actual mp4 video exist in data/input_files
+        try:
+            f = open("../data/input_files/" + video)
+            # Do something with the file
+        except IOError:
+            print(video + " does not exist in data/input_files folder")
+            continue
+
         print(f'Extracting for {video}')
         feature_dict = extractor.extract("../data/input_files/" + video)
         [(print(k), print(v.shape), print(v)) for k, v in feature_dict.items()]
@@ -62,7 +71,7 @@ if __name__ == '__main__':
         #rgb_flow_dict = {rgb[0]: rgb[1], flow[0]: flow[1]}
 
         # rgb .npy
-        data = np.expand_dims(rgb[1], axis=(2, 1)) # unsqueeze data to fit orig
+        data = np.expand_dims(rgb[1], axis=(2, 1)) # unsqueeze data to fit TSU dimension
         np.save("../Toyota_Smarthome/pipline/data/RGB_v_iashin/" + video[:-4] + "_rgb.npy", data)
 
         # flow .npy
@@ -80,11 +89,20 @@ if __name__ == '__main__':
         #print(flow_test)
         #print(rbg_flow_test)
 
-    with open(rgb_viashin_path) as outfile:
-        data = json.load(outfile)
-    data.update(dict_you_want)
+        # update i3d_CS_.json
+        with open(rgb_viashin_path) as outfile:
+            data = json.load(outfile)
+            added_npy = {video[:-4] + "_rgb": dict_you_want[video[:-4] + "_rgb"]}
+        data.update(added_npy)
 
-    with open(rgb_viashin_path, 'w') as outfile:
-        json.dump(data, outfile)
+        with open(rgb_viashin_path, 'w') as outfile:
+            json.dump(data, outfile)
+
+    #with open(rgb_viashin_path) as outfile:
+    #    data = json.load(outfile)
+    #data.update(dict_you_want)
+
+    #with open(rgb_viashin_path, 'w') as outfile:
+    #    json.dump(data, outfile)
 
     print("done extraction")

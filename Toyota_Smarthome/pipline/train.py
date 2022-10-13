@@ -6,6 +6,7 @@ import sys
 import torch
 import warnings
 from tqdm import tqdm
+import csv
 
 warnings.filterwarnings('ignore')
 
@@ -106,6 +107,15 @@ if args.dataset == 'TSU':
     rgb_root = './Toyota_Smarthome/pipline/data/RGB_v_iashin'
 
 
+activityList = ["Enter", "Walk", "Make_coffee", "Get_water", "Make_coffee", "Use_Drawer", "Make_coffee.Pour_grains", "Use_telephone",
+       "Leave", "Put_something_on_table", "Take_something_off_table",  "Pour.From_kettle",  "Stir_coffee/tea", "Drink.From_cup", "Dump_in_trash",  "Make_tea",
+       "Make_tea.Boil_water", "Use_cupboard",  "Make_tea.Insert_tea_bag", "Read", "Take_pills", "Use_fridge", "Clean_dishes",  "Clean_dishes.Put_something_in_sink",
+        "Eat_snack", "Sit_down", "Watch_TV", "Use_laptop", "Get_up",  "Drink.From_bottle",  "Pour.From_bottle",  "Drink.From_glass",
+        "Lay_down",  "Drink.From_can", "Write", "Breakfast", "Breakfast.Spread_jam_or_butter", "Breakfast.Cut_bread", "Breakfast.Eat_at_table",  "Breakfast.Take_ham",
+        "Clean_dishes.Dry_up", "Wipe_table", "Cook",  "Cook.Cut",  "Cook.Use_stove", "Cook.Stir", "Cook.Use_oven", "Clean_dishes.Clean_with_water",
+       "Use_tablet",  "Use_glasses", "Pour.From_can"]
+
+
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
@@ -183,19 +193,24 @@ def run(models, criterion, num_epochs=50):
     bestModel = None
     best_map = 0.0
     loop = tqdm(total=num_epochs, leave=False)
+    for model, gpu, dataloader, optimizer, sched, model_file in models:
+        num_train_videos = len(dataloader['train'])
+        num_test_videos = len(dataloader['val'])
     for epoch in range(num_epochs):
         # print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         # print('-' * 10)
         probs = []
         for model, gpu, dataloader, optimizer, sched, model_file in models:
             train_map, train_loss = train_step(model, gpu, optimizer, dataloader['train'], epoch)
-            prob_val, val_loss, val_map = val_step(model, gpu, dataloader['val'], epoch)
+            prob_val, val_loss, val_map, avg_class_prediction = val_step(model, gpu, dataloader['val'], epoch)
             probs.append(prob_val)
             sched.step(val_loss)
 
             if best_map < val_map:
                 best_map = val_map
                 bestModel = model
+                # prepare and write model performance to csv
+                prepare_write_data_for_csv(prob_val, avg_class_prediction, train_map, train_loss, num_train_videos, val_map, val_loss, num_test_videos, epoch)
                 # torch.save(model.state_dict(),
                 # './Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
                 # torch.save(model, './Toyota_Smarthome/pipline/' + str(args.model) + '/model_epoch_' + str(args.lr) + '_' + str(epoch))
@@ -313,15 +328,114 @@ def val_step(model, gpu, dataloader, epoch):
 
     val_map = torch.sum(100 * apm.value()) / torch.nonzero(100 * apm.value()).size()[0]
     # print('val-map:', val_map)
+    # print("apm value: ")
     # print(100 * apm.value())
+    avg_class_prediction = apm.value()
     apm.reset()
 
-    return full_probs, epoch_loss, val_map
+    return full_probs, epoch_loss, val_map, avg_class_prediction
+
+
+# loop through each tested videos to generate output data for saving into csv
+def prepare_write_data_for_csv(prob_val, avg_class_prediction, train_map, train_loss, num_train_videos, val_map, val_loss, num_test_videos, epoch):
+    dictForMaxAndIndex = {}
+    for video, video_value in prob_val.items():
+        arrayForMaxAndIndex = []
+        for video_length in range(len(prob_val.get(video)[0])):
+            activityAtEachFrameArray = []
+            for activity_index in range(len(prob_val.get(video))):
+                activityAtEachFrameArray.append(prob_val.get(video)[activity_index][video_length])
+            highest_confident = max(activityAtEachFrameArray)
+            highest_activity_index = activityAtEachFrameArray.index(highest_confident)
+            highest_confident = str(float_to_percent(highest_confident)) + "%"
+            arrayForMaxAndIndex.append([activityList[highest_activity_index], highest_confident])
+
+        # split arrayForMaxAndIndex into start and end frames with same activity and confident that occur consecutively
+        activity_frames_video_accuracy_array = []
+        start_array_position = 0
+        for vid_length in range(len(arrayForMaxAndIndex)):
+            if vid_length != len(arrayForMaxAndIndex) - 1: # if not at last item
+                current_activity = arrayForMaxAndIndex[vid_length][0]
+                current_confident_level = arrayForMaxAndIndex[vid_length][1]
+                next_length_activity = arrayForMaxAndIndex[vid_length + 1][0]
+                next_length_confident_level = arrayForMaxAndIndex[vid_length + 1][1]
+                if current_activity == next_length_activity and current_confident_level == next_length_confident_level:
+                    continue
+                else:
+                    activity_frames_video_accuracy_array.append([current_activity, (start_array_position * 16) + 1, (vid_length + 1) * 16, video, current_confident_level])
+                    start_array_position = vid_length + 1
+            else: # last item
+                if start_array_position != vid_length: # current item same as prev
+                    activity_frames_video_accuracy_array.append([arrayForMaxAndIndex[vid_length][0], (start_array_position * 16) + 1, (vid_length + 1) * 16, video, arrayForMaxAndIndex[vid_length][1]])
+                else:
+                    activity_frames_video_accuracy_array.append([arrayForMaxAndIndex[vid_length][0], (vid_length * 16) + 1, (video_length + 1) * 16, video, arrayForMaxAndIndex[vid_length][1]])
+
+        dictForMaxAndIndex[video] = activity_frames_video_accuracy_array
+    # all torch tensor class type
+    print("type of apm", avg_class_prediction)
+    avg_class_prediction = avg_class_prediction.tolist()
+    print("type of train map", train_map)
+    train_map = float(train_map)
+    print("type of train loss", train_loss)
+    train_loss = float(train_loss)
+    print("type of val map", val_map)
+    val_map = float(val_map)
+    print("type of val loss", val_loss)
+    val_loss = float(val_loss)
+
+    # write to csv in output folder
+    with open("./Toyota_Smarthome/pipline/result/" + args.name + ".csv", "w", newline="") as file:
+
+        # create write object
+        writer = csv.writer(file)
+
+        # create header 1
+        header_1 = ["Activity", "Average Class Prediction"]
+        writer.writerow(header_1)
+
+        # actual activity data
+        for activity_indx in range(len(avg_class_prediction)):
+            pred_in_percentage = float_to_percent(avg_class_prediction[activity_indx])
+            writer.writerow([activityList[activity_indx], str(pred_in_percentage) + "%"])
+
+        # create header 2
+        header_2 = ["Trained on", "Train m-AP", "Train loss", "Tested on", "Prediction m-AP", "Prediction loss", "Epoch"]
+        writer.writerow(header_2)
+
+        # write content 2
+        train_map = convert_two_decimal(train_map)
+        train_loss = convert_two_decimal(train_loss)
+        val_map = convert_two_decimal(val_map)
+        val_loss = convert_two_decimal(val_loss)
+        writer.writerow([str(num_train_videos) + " TSU videos", str(train_map) + "%", str(train_loss), str(num_test_videos) + " TSU videos", str(val_map) + "%", str(val_loss), epoch])
+
+        # write header 3
+        header_3 = ["Event", "Start_frame", "End_frame", "Video_Name", "Prediction Accurary for the video"]
+        writer.writerow(header_3)
+
+        # write content 3
+        for video, result_data in dictForMaxAndIndex.items():
+            for row_data in result_data:
+                writer.writerow(row_data)
+
+    #print(dictForMaxAndIndex)
+
+
+def convert_two_decimal(num):
+    return num - num % 0.0001
+
+
+# function to convert float num to percentage value
+def float_to_percent(num):
+    num = convert_two_decimal(num) * 100
+    if num % 1 == 0:
+        return int(num)
+    else:
+        return num
 
 
 def filter_json_file(list_to_filter):
     f = open(test_split)
-    print(list_to_filter)
     data = json.load(f)
     dict_you_want = {your_key + "_rgb": data[your_key] for your_key in list_to_filter}
     with open("./Toyota_Smarthome/pipline/data/" + args.name + "_CS.json", "w") as f:
@@ -338,7 +452,7 @@ if __name__ == '__main__':
     filter_json_file(video_list)
 
     train_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
-    test_split = './Toyota_Smarthome/pipline/data/i3d_CS.json'
+    test_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
 
     if args.mode == 'flow':
         pass  # ownself added this line to prevent error
