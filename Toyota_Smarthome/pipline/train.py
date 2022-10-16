@@ -196,7 +196,7 @@ def run(models, criterion, num_epochs=50):
 
     bestModel = None
     best_map = 0.0
-    loop = tqdm(total=num_epochs, leave=False)
+    loop = tqdm(total=num_epochs, position=0, leave=True)
     for model, gpu, dataloader, optimizer, sched, model_file in models:
         num_train_videos = len(dataloader['train'])
         num_test_videos = len(dataloader['val'])

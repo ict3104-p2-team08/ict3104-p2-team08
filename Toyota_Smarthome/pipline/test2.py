@@ -377,7 +377,7 @@ def create_caption_video(arrayWithCaptions):
     writer = cv2.VideoWriter('./Toyota_Smarthome/pipline/video_output/' + args.videofile + '_caption.mp4', apiPreference=0, fourcc=fourcc,
                              fps=video_fps[0], frameSize=(int(width), int(height)))
 
-    loop = tqdm(total=length, leave=False)
+    loop = tqdm(total=length, position=0, leave=True)
     i = 1 #frame counter
     counter = 0 #counter for arrayWithCaptions
     array_for_csv = []
