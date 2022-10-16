@@ -16,11 +16,10 @@ rgb_viashin_path = '../Toyota_Smarthome/pipline/data/i3d_CS.json'
 smarthome_cs_path = '../Toyota_Smarthome/pipline/data/smarthome_CS_51.json'
 
 if __name__ == '__main__':
-    print("checking for select video's npy")
+    print("checking for selected video's npy")
     video_list = args.videosToExtract.split(",")
     new_video_list = [video + "_rgb" for video in video_list]
     video_to_extract = []
-    print(new_video_list)
     f = open(rgb_viashin_path)
     rgb_viashin_json = json.load(f)
     # get videos with feature not extracted before
@@ -60,7 +59,7 @@ if __name__ == '__main__':
 
         print(f'Extracting for {video}')
         feature_dict = extractor.extract("../data/input_files/" + video)
-        [(print(k), print(v.shape), print(v)) for k, v in feature_dict.items()]
+        # [(print(k), print(v.shape), print(v)) for k, v in feature_dict.items()]
 
         # derive rgb, flow, rgb+flow dict
         rgb = list(feature_dict.items())[0]

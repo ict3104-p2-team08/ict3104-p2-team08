@@ -71,7 +71,6 @@ torch.cuda.manual_seed_all(SEED)
 random.seed(SEED)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
-print('Random_SEED!!!:', SEED)
 
 from torch.optim import lr_scheduler
 from torch.autograd import Variable
@@ -190,7 +189,7 @@ def load_data(train_split, val_split, root):
 # train the model
 def run(models, criterion, num_epochs=50):
     # Initialize WandB
-    wandb.init(name='Data visualisation',
+    wandb.init(name=args.name + " Performance",
                project='ICT3104_project',
                notes='This is a testing project',
                tags=['TSU dataset', 'Test Run'])
@@ -234,7 +233,7 @@ def run(models, criterion, num_epochs=50):
             "Train Loss": train_loss,
             "Train Acc": train_map,
             "Valid Loss": val_loss,
-            "Valid Acc": val_map,})
+            "Valid Acc": val_map})
 
         # show progress bar
         loop.set_description("training..")
@@ -391,16 +390,11 @@ def prepare_write_data_for_csv(prob_val, avg_class_prediction, train_map, train_
                     activity_frames_video_accuracy_array.append([arrayForMaxAndIndex[vid_length][0], (vid_length * 16) + 1, (video_length + 1) * 16, video, arrayForMaxAndIndex[vid_length][1]])
 
         dictForMaxAndIndex[video] = activity_frames_video_accuracy_array
-    # all torch tensor class type
-    print("type of apm", avg_class_prediction)
+    # convert torch tensor class type to list/float
     avg_class_prediction = avg_class_prediction.tolist()
-    print("type of train map", train_map)
     train_map = float(train_map)
-    print("type of train loss", train_loss)
     train_loss = float(train_loss)
-    print("type of val map", val_map)
     val_map = float(val_map)
-    print("type of val loss", val_loss)
     val_loss = float(val_loss)
 
     # write to csv in output folder
@@ -463,10 +457,6 @@ def filter_json_file(list_to_filter):
 
 
 if __name__ == '__main__':
-    print(str(args.model))
-    print('batch_size:', batch_size)
-    print('cuda_avail', torch.cuda.is_available())
-
     video_list = args.video_train_test.split(",")
 
     filter_json_file(video_list)
@@ -479,10 +469,8 @@ if __name__ == '__main__':
         # print('flow mode', flow_root) #ownself commented
         # dataloaders, datasets = load_data(train_split, test_split, flow_root) #ownself commented
     elif args.mode == 'skeleton':
-        print('Pose mode', skeleton_root)
         dataloaders, datasets = load_data(train_split, test_split, skeleton_root)
     elif args.mode == 'rgb':
-        print('RGB mode', rgb_root)
         #dataloaders, datasets = load_data(train_split, test_split, rgb_root)
         dataloaders, datasets = load_data_rgb(train_split, test_split, rgb_root)
 
@@ -497,12 +485,12 @@ if __name__ == '__main__':
         mid_channel = int(args.num_channel)
 
         if args.model == "SSPDAN":
-            print("you are processing SSPDAN")
+            # print("you are processing SSPDAN")
             from models import SSPDAN as Net
 
             model = Net(num_layers=5, num_f_maps=mid_channel, dim=input_channnel, num_classes=classes)
         else:
-            print("you are processing PDAN")
+            # print("you are processing PDAN")
             from models import PDAN as Net
 
             model = Net(num_stages=1, num_layers=5, num_f_maps=mid_channel, dim=input_channnel, num_classes=classes)
@@ -514,16 +502,13 @@ if __name__ == '__main__':
             model = torch.load(args.load_model)
             # weight
             # model.load_state_dict(torch.load(str(args.load_model)))
-            print("loaded", args.load_model)
+            # print("loaded", args.load_model)
 
         pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        print('pytorch_total_params', pytorch_total_params)
-        print('num_channel:', num_channel, 'input_channnel:', input_channnel, 'num_classes:', num_classes)
         model.cuda()
 
         criterion = nn.NLLLoss(reduce=False)
         lr = float(args.lr)
-        print(lr)
         optimizer = optim.Adam(model.parameters(), lr=lr)
         lr_sched = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=8, verbose=True)
         run([(model, 0, dataloaders, optimizer, lr_sched, args.comp_info)], criterion, num_epochs=int(args.epoch))

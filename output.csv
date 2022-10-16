@@ -1,8 +1,4 @@
 event,start_frame,end_frame
-Clean_dishes,0,71
-Pour.From_can,72,281
-Clean_dishes,282,491
-Pour.From_can,492,561
-Clean_dishes,562,631
-Pour.From_can,632,701
-Clean_dishes,702,770
+Clean_dishes,0,421
+Read,422,491
+Clean_dishes,492,770
