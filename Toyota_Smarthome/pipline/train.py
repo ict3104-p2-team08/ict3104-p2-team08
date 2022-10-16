@@ -7,6 +7,7 @@ import torch
 import warnings
 from tqdm import tqdm
 import csv
+import wandb
 
 warnings.filterwarnings('ignore')
 
@@ -188,7 +189,11 @@ def load_data(train_split, val_split, root):
 
 # train the model
 def run(models, criterion, num_epochs=50):
-    since = time.time()
+    # Initialize WandB
+    wandb.init(name='Data visualisation',
+               project='ICT3104_project',
+               notes='This is a testing project',
+               tags=['TSU dataset', 'Test Run'])
 
     bestModel = None
     best_map = 0.0
@@ -215,6 +220,21 @@ def run(models, criterion, num_epochs=50):
                 # './Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
                 # torch.save(model, './Toyota_Smarthome/pipline/' + str(args.model) + '/model_epoch_' + str(args.lr) + '_' + str(epoch))
                 # print('save here:', './Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
+
+        avg_class_prediction = avg_class_prediction.tolist()
+        avg_class_prediction_result = {}
+        # actual activity data
+        for activity_index in range(len(avg_class_prediction)):
+            pred_in_percentage = float_to_percent(avg_class_prediction[activity_index])
+            avg_class_prediction_result[activityList[activity_index]] = pred_in_percentage
+        # Log the loss and accuracy values at the end of each epoch
+        wandb.log({
+            "Average Class Prediction": avg_class_prediction_result,
+            "Epoch": epoch,
+            "Train Loss": train_loss,
+            "Train Acc": train_map,
+            "Valid Loss": val_loss,
+            "Valid Acc": val_map,})
 
         # show progress bar
         loop.set_description("training..")
