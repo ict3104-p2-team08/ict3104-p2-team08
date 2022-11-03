@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Union
 
 import numpy as np
-from utils.utils import (load_numpy, load_pickle, make_path, write_numpy,
+from video_feature_utils.videofeature_utils import (load_numpy, load_pickle, make_path, write_numpy,
                          write_pickle)
 
 

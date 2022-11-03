@@ -13,8 +13,8 @@ from models2.raft.raft_src.raft import RAFT, InputPadder
 from models2.transforms import (Clamp, PermuteAndUnsqueeze, PILToTensor,
                                 ResizeImproved, ScaleTo1_1, TensorCenterCrop,
                                 ToFloat, ToUInt8)
-from utils.io import reencode_video_with_diff_fps
-from utils.utils import dp_state_to_normal, show_predictions_on_dataset
+from video_feature_utils.io import reencode_video_with_diff_fps
+from video_feature_utils.videofeature_utils import dp_state_to_normal, show_predictions_on_dataset
 
 
 class ExtractI3D(BaseExtractor):

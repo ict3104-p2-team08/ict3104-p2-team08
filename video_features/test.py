@@ -1,6 +1,6 @@
 #import sys
 #sys.path.append('../')
-from utils.utils import build_cfg_path
+from video_feature_utils.videofeature_utils import build_cfg_path
 from models2.i3d.extract_i3d import ExtractI3D
 from omegaconf import OmegaConf
 import numpy as np

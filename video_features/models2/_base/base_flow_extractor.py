@@ -5,13 +5,13 @@ import cv2
 import numpy as np
 import torch
 import torchvision
-import utils.flow_viz as flow_viz
+import video_feature_utils.flow_viz as flow_viz
 from models2._base.base_extractor import BaseExtractor
 from models2.raft.raft_src.raft import RAFT, InputPadder
 from models2.transforms import (PILToTensor, ResizeImproved, ToFloat,
                                 ToTensorWithoutScaling)
-from utils.utils import dp_state_to_normal
-from utils.io import VideoLoader
+from video_feature_utils.videofeature_utils import dp_state_to_normal
+from video_feature_utils.io import VideoLoader
 
 
 class BaseOpticalFlowExtractor(BaseExtractor):
