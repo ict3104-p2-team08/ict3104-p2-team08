@@ -6,7 +6,11 @@ import sys
 import torch
 import warnings
 from tqdm import tqdm
+import csv
+import wandb
+
 warnings.filterwarnings('ignore')
+
 
 def str2bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -18,24 +22,25 @@ def str2bool(v):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-mode', type=str, help='rgb or flow (or joint for eval)', default='rgb') #added default parameter
+parser.add_argument('-mode', type=str, help='rgb or flow (or joint for eval)', default='rgb')  # added default parameter
 parser.add_argument('-train', type=str2bool, default='True', help='train or eval')
 parser.add_argument('-comp_info', type=str)
 parser.add_argument('-rgb_model_file', type=str)
 parser.add_argument('-flow_model_file', type=str)
 parser.add_argument('-gpu', type=str, default='4')
-parser.add_argument('-dataset', type=str, default='TSU') #change default from "charades" to "TSU"
+parser.add_argument('-dataset', type=str, default='TSU')  # change default from "charades" to "TSU"
 parser.add_argument('-rgb_root', type=str, default='no_root')
 parser.add_argument('-flow_root', type=str, default='no_root')
 parser.add_argument('-type', type=str, default='original')
 parser.add_argument('-lr', type=str, default='0.1')
-parser.add_argument('-epoch', type=str, default='50') #change default from "50" to "50"
+parser.add_argument('-epoch', type=str, default='50')  # change default from "50" to "50"
 parser.add_argument('-model', type=str, default='PDAN')  # change default from "" to "PDAN"
-parser.add_argument('-APtype', type=str, default='map') #change default from "wap" to "map"
+parser.add_argument('-APtype', type=str, default='map')  # change default from "wap" to "map"
 parser.add_argument('-randomseed', type=str, default='False')
-parser.add_argument('-load_model', type=str, default='False') #change default from "False" to "True"
-parser.add_argument('-num_channel', type=str, default='3') # change default from "False" to "2" (just random no idea why 2)
-parser.add_argument('-batch_size', type=str, default='1') # change default from "False" to "1"
+parser.add_argument('-load_model', type=str, default='False')  # change default from "False" to "True"
+parser.add_argument('-num_channel', type=str,
+                    default='3')  # change default from "False" to "2" (just random no idea why 2)
+parser.add_argument('-batch_size', type=str, default='1')  # change default from "False" to "1"
 parser.add_argument('-kernelsize', type=str, default='False')
 parser.add_argument('-feat', type=str, default='False')
 parser.add_argument('-split_setting', type=str, default='CS')
@@ -66,7 +71,6 @@ torch.cuda.manual_seed_all(SEED)
 random.seed(SEED)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
-print('Random_SEED!!!:', SEED)
 
 from torch.optim import lr_scheduler
 from torch.autograd import Variable
@@ -81,13 +85,11 @@ if str(args.APtype) == 'map':
 
 batch_size = int(args.batch_size)
 
-
 if args.dataset == 'TSU':
     split_setting = str(args.split_setting)
 
     from smarthome_i3d_per_video import TSU as Dataset
     from smarthome_i3d_per_video import TSU_collate_fn as collate_fn
-
 
     classes = 51
 
@@ -102,6 +104,16 @@ if args.dataset == 'TSU':
     rgb_root = './Toyota_Smarthome/pipline/data/RGB_i3d_16frames_64000_SSD'
     skeleton_root = '/skeleton/feat/Path/'  #
 
+    rgb_root = './Toyota_Smarthome/pipline/data/RGB_v_iashin'
+
+
+activityList = ["Enter", "Walk", "Make_coffee", "Get_water", "Make_coffee", "Use_Drawer", "Make_coffee.Pour_grains", "Use_telephone",
+       "Leave", "Put_something_on_table", "Take_something_off_table",  "Pour.From_kettle",  "Stir_coffee/tea", "Drink.From_cup", "Dump_in_trash",  "Make_tea",
+       "Make_tea.Boil_water", "Use_cupboard",  "Make_tea.Insert_tea_bag", "Read", "Take_pills", "Use_fridge", "Clean_dishes",  "Clean_dishes.Put_something_in_sink",
+        "Eat_snack", "Sit_down", "Watch_TV", "Use_laptop", "Get_up",  "Drink.From_bottle",  "Pour.From_bottle",  "Drink.From_glass",
+        "Lay_down",  "Drink.From_can", "Write", "Breakfast", "Breakfast.Spread_jam_or_butter", "Breakfast.Cut_bread", "Breakfast.Eat_at_table",  "Breakfast.Take_ham",
+        "Clean_dishes.Dry_up", "Wipe_table", "Cook",  "Cook.Cut",  "Cook.Use_stove", "Cook.Stir", "Cook.Use_oven", "Clean_dishes.Clean_with_water",
+       "Use_tablet",  "Use_glasses", "Pour.From_can"]
 
 
 def sigmoid(x):
@@ -122,6 +134,29 @@ def load_data_rgb_skeleton(train_split, val_split, root_skeleton, root_rgb):
     val_dataset = Dataset(val_split, 'testing', root_skeleton, root_rgb, batch_size, classes)
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=0,
                                                  pin_memory=True, collate_fn=collate_fn)  # 2
+
+    dataloaders = {'train': dataloader, 'val': val_dataloader}
+    datasets = {'train': dataset, 'val': val_dataset}
+    return dataloaders, datasets
+
+
+def load_data_rgb(train_split, val_split, root):
+    # Load rgb Data
+
+    if len(train_split) > 0:
+        dataset = Dataset(train_split, 'training', root, batch_size, classes)
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0,
+                                                 pin_memory=True, collate_fn=collate_fn)
+        dataloader.root = root
+    else:
+
+        dataset = None
+        dataloader = None
+
+    val_dataset = Dataset(val_split, 'testing', root, batch_size, classes)
+    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=0,
+                                                 pin_memory=True, collate_fn=collate_fn)
+    val_dataloader.root = root
 
     dataloaders = {'train': dataloader, 'val': val_dataloader}
     datasets = {'train': dataset, 'val': val_dataset}
@@ -153,32 +188,55 @@ def load_data(train_split, val_split, root):
 
 # train the model
 def run(models, criterion, num_epochs=50):
-    since = time.time()
+    # Initialize WandB
+    wandb.init(name=args.name + " Performance",
+               project='ICT3104_project',
+               notes='This is a testing project',
+               tags=['TSU dataset', 'Test Run'])
 
     bestModel = None
     best_map = 0.0
-    loop = tqdm(total=num_epochs, leave=False)
+    loop = tqdm(total=num_epochs, position=0, leave=True)
+    for model, gpu, dataloader, optimizer, sched, model_file in models:
+        num_train_videos = len(dataloader['train'])
+        num_test_videos = len(dataloader['val'])
     for epoch in range(num_epochs):
-        #print('Epoch {}/{}'.format(epoch, num_epochs - 1))
-        #print('-' * 10)
-
+        # print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        # print('-' * 10)
         probs = []
         for model, gpu, dataloader, optimizer, sched, model_file in models:
             train_map, train_loss = train_step(model, gpu, optimizer, dataloader['train'], epoch)
-            prob_val, val_loss, val_map = val_step(model, gpu, dataloader['val'], epoch)
+            prob_val, val_loss, val_map, avg_class_prediction = val_step(model, gpu, dataloader['val'], epoch)
             probs.append(prob_val)
             sched.step(val_loss)
 
             if best_map < val_map:
                 best_map = val_map
                 bestModel = model
-                #torch.save(model.state_dict(),
-                           #'./Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
-                #torch.save(model, './Toyota_Smarthome/pipline/' + str(args.model) + '/model_epoch_' + str(args.lr) + '_' + str(epoch))
-                #print('save here:', './Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
+                # prepare and write model performance to csv
+                prepare_write_data_for_csv(prob_val, avg_class_prediction, train_map, train_loss, num_train_videos, val_map, val_loss, num_test_videos, epoch)
+                # torch.save(model.state_dict(),
+                # './Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
+                # torch.save(model, './Toyota_Smarthome/pipline/' + str(args.model) + '/model_epoch_' + str(args.lr) + '_' + str(epoch))
+                # print('save here:', './Toyota_Smarthome/pipline/' + str(args.model) + '/weight_epoch_' + str(args.lr) + '_' + str(epoch))
 
-        #show progress bar
-        loop.set_description("training..".format(i))
+        avg_class_prediction = avg_class_prediction.tolist()
+        avg_class_prediction_result = {}
+        # actual activity data
+        for activity_index in range(len(avg_class_prediction)):
+            pred_in_percentage = float_to_percent(avg_class_prediction[activity_index])
+            avg_class_prediction_result[activityList[activity_index]] = pred_in_percentage
+        # Log the loss and accuracy values at the end of each epoch
+        wandb.log({
+            "Average Class Prediction": avg_class_prediction_result,
+            "Epoch": epoch,
+            "Train Loss": train_loss,
+            "Train Acc": train_map,
+            "Valid Loss": val_loss,
+            "Valid Acc": val_map})
+
+        # show progress bar
+        loop.set_description("training..")
         loop.update(1)
     torch.save(bestModel, './Toyota_Smarthome/pipline/models/' + str(args.name))
     print("Completed")
@@ -251,7 +309,7 @@ def train_step(model, gpu, optimizer, dataloader, epoch):
         train_map = 100 * apm.value()
     else:
         train_map = 100 * apm.value().mean()
-    #print('train-map:', train_map)
+    # print('train-map:', train_map)
     apm.reset()
 
     epoch_loss = tot_loss / num_iter
@@ -288,56 +346,133 @@ def val_step(model, gpu, dataloader, epoch):
     epoch_loss = tot_loss / num_iter
 
     val_map = torch.sum(100 * apm.value()) / torch.nonzero(100 * apm.value()).size()[0]
-    #print('val-map:', val_map)
-    #print(100 * apm.value())
+    # print('val-map:', val_map)
+    # print("apm value: ")
+    # print(100 * apm.value())
+    avg_class_prediction = apm.value()
     apm.reset()
 
-    return full_probs, epoch_loss, val_map
+    return full_probs, epoch_loss, val_map, avg_class_prediction
+
+
+# loop through each tested videos to generate output data for saving into csv
+def prepare_write_data_for_csv(prob_val, avg_class_prediction, train_map, train_loss, num_train_videos, val_map, val_loss, num_test_videos, epoch):
+    dictForMaxAndIndex = {}
+    for video, video_value in prob_val.items():
+        arrayForMaxAndIndex = []
+        for video_length in range(len(prob_val.get(video)[0])):
+            activityAtEachFrameArray = []
+            for activity_index in range(len(prob_val.get(video))):
+                activityAtEachFrameArray.append(prob_val.get(video)[activity_index][video_length])
+            highest_confident = max(activityAtEachFrameArray)
+            highest_activity_index = activityAtEachFrameArray.index(highest_confident)
+            highest_confident = str(float_to_percent(highest_confident)) + "%"
+            arrayForMaxAndIndex.append([activityList[highest_activity_index], highest_confident])
+
+        # split arrayForMaxAndIndex into start and end frames with same activity and confident that occur consecutively
+        activity_frames_video_accuracy_array = []
+        start_array_position = 0
+        for vid_length in range(len(arrayForMaxAndIndex)):
+            if vid_length != len(arrayForMaxAndIndex) - 1: # if not at last item
+                current_activity = arrayForMaxAndIndex[vid_length][0]
+                current_confident_level = arrayForMaxAndIndex[vid_length][1]
+                next_length_activity = arrayForMaxAndIndex[vid_length + 1][0]
+                next_length_confident_level = arrayForMaxAndIndex[vid_length + 1][1]
+                if current_activity == next_length_activity and current_confident_level == next_length_confident_level:
+                    continue
+                else:
+                    activity_frames_video_accuracy_array.append([current_activity, (start_array_position * 16) + 1, (vid_length + 1) * 16, video, current_confident_level])
+                    start_array_position = vid_length + 1
+            else: # last item
+                if start_array_position != vid_length: # current item same as prev
+                    activity_frames_video_accuracy_array.append([arrayForMaxAndIndex[vid_length][0], (start_array_position * 16) + 1, (vid_length + 1) * 16, video, arrayForMaxAndIndex[vid_length][1]])
+                else:
+                    activity_frames_video_accuracy_array.append([arrayForMaxAndIndex[vid_length][0], (vid_length * 16) + 1, (video_length + 1) * 16, video, arrayForMaxAndIndex[vid_length][1]])
+
+        dictForMaxAndIndex[video] = activity_frames_video_accuracy_array
+    # convert torch tensor class type to list/float
+    avg_class_prediction = avg_class_prediction.tolist()
+    train_map = float(train_map)
+    train_loss = float(train_loss)
+    val_map = float(val_map)
+    val_loss = float(val_loss)
+
+    # write to csv in output folder
+    with open("./Toyota_Smarthome/pipline/result/" + args.name + ".csv", "w", newline="") as file:
+
+        # create write object
+        writer = csv.writer(file)
+
+        # create header 1
+        header_1 = ["Activity", "Average Class Prediction"]
+        writer.writerow(header_1)
+
+        # actual activity data
+        for activity_indx in range(len(avg_class_prediction)):
+            pred_in_percentage = float_to_percent(avg_class_prediction[activity_indx])
+            writer.writerow([activityList[activity_indx], str(pred_in_percentage) + "%"])
+
+        # create header 2
+        header_2 = ["Trained on", "Train m-AP", "Train loss", "Tested on", "Prediction m-AP", "Prediction loss", "Epoch"]
+        writer.writerow(header_2)
+
+        # write content 2
+        train_map = convert_two_decimal(train_map)
+        train_loss = convert_two_decimal(train_loss)
+        val_map = convert_two_decimal(val_map)
+        val_loss = convert_two_decimal(val_loss)
+        writer.writerow([str(num_train_videos) + " TSU videos", str(train_map) + "%", str(train_loss), str(num_test_videos) + " TSU videos", str(val_map) + "%", str(val_loss), epoch])
+
+        # write header 3
+        header_3 = ["Event", "Start_frame", "End_frame", "Video_Name", "Prediction Accurary for the video"]
+        writer.writerow(header_3)
+
+        # write content 3
+        for video, result_data in dictForMaxAndIndex.items():
+            for row_data in result_data:
+                writer.writerow(row_data)
+
+    #print(dictForMaxAndIndex)
+
+
+def convert_two_decimal(num):
+    return num - num % 0.0001
+
+
+# function to convert float num to percentage value
+def float_to_percent(num):
+    num = convert_two_decimal(num) * 100
+    if num % 1 == 0:
+        return int(num)
+    else:
+        return num
 
 
 def filter_json_file(list_to_filter):
     f = open(test_split)
-    print(list_to_filter)
     data = json.load(f)
-    dict_you_want = {your_key: data[your_key] for your_key in list_to_filter}
+    dict_you_want = {your_key + "_rgb": data[your_key] for your_key in list_to_filter}
     with open("./Toyota_Smarthome/pipline/data/" + args.name + "_CS.json", "w") as f:
         json.dump(dict_you_want, f)
-    testable_videos = []
-    for video_key, video_values in dict_you_want.items():
-        if video_values["subset"] == "testing":
-            testable_videos.append(video_key)
-    json_to_save = {args.name: testable_videos}
-    print(json_to_save)
-    with open("./Toyota_Smarthome/pipline/model_videos.json") as outfile:
-        data = json.load(outfile)
-    data.update(json_to_save)
-
-    with open("./Toyota_Smarthome/pipline/model_videos.json", 'w') as outfile:
-        json.dump(data, outfile)
 
 
 if __name__ == '__main__':
-    print(str(args.model))
-    print('batch_size:', batch_size)
-    print('cuda_avail', torch.cuda.is_available())
-
     video_list = args.video_train_test.split(",")
 
     filter_json_file(video_list)
 
     train_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
-    train_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
+    test_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
 
     if args.mode == 'flow':
         pass  # ownself added this line to prevent error
         # print('flow mode', flow_root) #ownself commented
         # dataloaders, datasets = load_data(train_split, test_split, flow_root) #ownself commented
     elif args.mode == 'skeleton':
-        print('Pose mode', skeleton_root)
         dataloaders, datasets = load_data(train_split, test_split, skeleton_root)
     elif args.mode == 'rgb':
-        print('RGB mode', rgb_root)
-        dataloaders, datasets = load_data(train_split, test_split, rgb_root)
+        #dataloaders, datasets = load_data(train_split, test_split, rgb_root)
+        dataloaders, datasets = load_data_rgb(train_split, test_split, rgb_root)
 
     if args.train:
         num_channel = args.num_channel
@@ -350,12 +485,12 @@ if __name__ == '__main__':
         mid_channel = int(args.num_channel)
 
         if args.model == "SSPDAN":
-            print("you are processing SSPDAN")
+            # print("you are processing SSPDAN")
             from models import SSPDAN as Net
 
             model = Net(num_layers=5, num_f_maps=mid_channel, dim=input_channnel, num_classes=classes)
         else:
-            print("you are processing PDAN")
+            # print("you are processing PDAN")
             from models import PDAN as Net
 
             model = Net(num_stages=1, num_layers=5, num_f_maps=mid_channel, dim=input_channnel, num_classes=classes)
@@ -367,16 +502,13 @@ if __name__ == '__main__':
             model = torch.load(args.load_model)
             # weight
             # model.load_state_dict(torch.load(str(args.load_model)))
-            print("loaded", args.load_model)
+            # print("loaded", args.load_model)
 
         pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        print('pytorch_total_params', pytorch_total_params)
-        print('num_channel:', num_channel, 'input_channnel:', input_channnel, 'num_classes:', num_classes)
         model.cuda()
 
         criterion = nn.NLLLoss(reduce=False)
         lr = float(args.lr)
-        print(lr)
         optimizer = optim.Adam(model.parameters(), lr=lr)
         lr_sched = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=8, verbose=True)
         run([(model, 0, dataloaders, optimizer, lr_sched, args.comp_info)], criterion, num_epochs=int(args.epoch))

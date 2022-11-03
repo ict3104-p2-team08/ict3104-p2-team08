@@ -102,9 +102,10 @@ if args.dataset == 'TSU':
     rgb_root = './Toyota_Smarthome/pipline/data/RGB_i3d_16frames_64000_SSD'
     skeleton_root = '/skeleton/feat/Path/'  #
 
-    if args.model != "PDAN":
-        train_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
-        test_split = './Toyota_Smarthome/pipline/data/' + args.name + '_CS.json'
+    if args.name != "PDAN":
+        train_split = './Toyota_Smarthome/pipline/data/i3d_CS.json'
+        test_split = './Toyota_Smarthome/pipline/data/i3d_CS.json'
+        rgb_root = './Toyota_Smarthome/pipline/data/RGB_v_iashin'
 
 
 def sigmoid(x):
@@ -130,13 +131,13 @@ def load_data_rgb_skeleton(train_split, val_split, root_skeleton, root_rgb):
     datasets = {'train': dataset, 'val': val_dataset}
     return dataloaders, datasets
 
-activityList = ["Enter", "Walk", "Make_coffee.Get_water", "put something in sink", "add_water_to_coffee_machine", "Use_Drawer", "stir_coffee/tea", "Use_telephone",
-       "Leave", "Put_something_on_table", "Drink.From_glass",  "Pour.From_kettle",  "Pour.Coffee_grain", "Drink.From_cup", "Dump_in_trash",  "Make_tea.Boil_water",
-       "Make_tea", "Use_cupboard",  "Make_tea.Insert_tea_bag", "Read", "Drink.From_bottle", "Use_fridge", "Wipe_table",  "Take_pills",
-        "Eat_snack", "Sit_down", "Watch_TV", "Use_laptop", "Get_up",  "Pour.From_bottle",  "Take_something_off_table",  "Pour.from_can",
-        "Lay_down",  "Use_glasses", "Write", "Breakfast", "Breakfast.Spread_butter", "Breakfast.Take_ham", "Drink.From_can",  "Breakfast.Cut_bread",
-        "Clean_dishes.Dry_up", "Clean_dishes.Clean_with_water", "Cook.Use_stove",  "Cook.Cut",  "unknown class 44", "Cook.Stir", "Cook.Use_oven", "use_Tablet",
-       "",  "", ""]
+activityList = ["Enter", "Walk", "Make_coffee", "Get_water", "Make_coffee", "Use_Drawer", "Make_coffee.Pour_grains", "Use_telephone",
+       "Leave", "Put_something_on_table", "Take_something_off_table",  "Pour.From_kettle",  "Stir_coffee/tea", "Drink.From_cup", "Dump_in_trash",  "Make_tea",
+       "Make_tea.Boil_water", "Use_cupboard",  "Make_tea.Insert_tea_bag", "Read", "Take_pills", "Use_fridge", "Clean_dishes",  "Clean_dishes.Put_something_in_sink",
+        "Eat_snack", "Sit_down", "Watch_TV", "Use_laptop", "Get_up",  "Drink.From_bottle",  "Pour.From_bottle",  "Drink.From_glass",
+        "Lay_down",  "Drink.From_can", "Write", "Breakfast", "Breakfast.Spread_jam_or_butter", "Breakfast.Cut_bread", "Breakfast.Eat_at_table",  "Breakfast.Take_ham",
+        "Clean_dishes.Dry_up", "Wipe_table", "Cook",  "Cook.Cut",  "Cook.Use_stove", "Cook.Stir", "Cook.Use_oven", "Clean_dishes.Clean_with_water",
+       "Use_tablet",  "Use_glasses", "Pour.From_can"]
 
 #self declared (essentially works same as run() method)
 def val_file(models, num_epochs=50):
@@ -155,10 +156,34 @@ def val_file(models, num_epochs=50):
                 activityAtEachFrameArray.append(prob_val.get(args.videofile)[index1][index])
             maxValue = max(activityAtEachFrameArray)
             indexOfMaxValue = activityAtEachFrameArray.index(maxValue)
+            # round confident to 2 decimal place
+            maxValue = round(maxValue, 2)
             arrayForMaxAndIndex.append([activityList[indexOfMaxValue], maxValue])
         create_caption_video(arrayForMaxAndIndex)
         #print("array for both max and index: ", arrayForMaxAndIndex)
 
+
+def load_data_rgb(train_split, val_split, root):
+    # Load Data
+
+    if len(train_split) > 0:
+        dataset = Dataset(train_split, 'training', root, batch_size, classes)
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0,
+                                                 pin_memory=True, collate_fn=collate_fn)
+        dataloader.root = root
+    else:
+
+        dataset = None
+        dataloader = None
+
+    val_dataset = Dataset(val_split, 'testing', root, batch_size, classes)
+    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=0,
+                                                 pin_memory=True, collate_fn=collate_fn)
+    val_dataloader.root = root
+
+    dataloaders = {'train': dataloader, 'val': val_dataloader}
+    datasets = {'train': dataset, 'val': val_dataset}
+    return dataloaders, datasets
 
 
 def load_data(train_split, val_split, root):
@@ -338,7 +363,8 @@ def val_step(model, gpu, dataloader, epoch):
 
 def create_caption_video(arrayWithCaptions):
     import cv2
-    cap = cv2.VideoCapture('./data/input_files/' + args.videofile + ".mp4")
+    videofile = args.videofile.replace('_rgb', '')
+    cap = cv2.VideoCapture('./data/input_files/' + videofile + ".mp4")
 
     length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     numberOfFramePerCaption = math.ceil(length / len(arrayWithCaptions))
@@ -351,7 +377,7 @@ def create_caption_video(arrayWithCaptions):
     writer = cv2.VideoWriter('./Toyota_Smarthome/pipline/video_output/' + args.videofile + '_caption.mp4', apiPreference=0, fourcc=fourcc,
                              fps=video_fps[0], frameSize=(int(width), int(height)))
 
-    loop = tqdm(total=length, leave=False)
+    loop = tqdm(total=length, position=0, leave=True)
     i = 1 #frame counter
     counter = 0 #counter for arrayWithCaptions
     array_for_csv = []
@@ -407,6 +433,9 @@ def create_caption_video(arrayWithCaptions):
                         (0, 255, 0),
                         2,
                         cv2.LINE_4)
+            # write confident rate if caption predicted matches annotated caption
+            if caption == caption1:
+                cv2.putText(frame, str(arrayWithCaptions[counter][1]), (600, 20), font, 0.5, (0, 255, 0), 2, cv2.LINE_4)
             if annotated_current_position < len(annotated_csv) - 1:
                 if int(annotated_csv[annotated_current_position + 1][1]) <= i <= int(annotated_csv[annotated_current_position + 1][2]):
                     caption2 = annotated_csv[annotated_current_position + 1][0]
@@ -417,6 +446,12 @@ def create_caption_video(arrayWithCaptions):
                                 (0, 255, 0),
                                 2,
                                 cv2.LINE_4)
+
+                    # write confident rate if caption predicted matches annotated caption
+                    if caption == caption2:
+                        cv2.putText(frame, str(arrayWithCaptions[counter][1]), (600, 20), font, 0.5, (0, 255, 0), 2,
+                                    cv2.LINE_4)
+
         if i >= int(annotated_csv[annotated_current_position][2]) and annotated_current_position < len(annotated_csv) - 1:
             annotated_current_position += 1
 
@@ -463,7 +498,8 @@ def generateCSV(arrayForCSV):
         writer.writerows(arrayForCSV)
 
 def readCSV():
-    filePath = "./data/input_csv/" + args.videofile + ".csv"
+    videofile = args.videofile.replace('_rgb', '')
+    filePath = "./data/input_csv/" + videofile + ".csv"
     with open(filePath, newline='') as f:
         reader = csv.reader(f)
         data = list(reader)
@@ -486,7 +522,8 @@ if __name__ == '__main__':
         dataloaders, datasets = load_data(train_split, test_split, skeleton_root)
     elif args.mode == 'rgb':
         #print('RGB mode', rgb_root)
-        dataloaders, datasets = load_data(train_split, test_split, rgb_root)
+        #dataloaders, datasets = load_data(train_split, test_split, rgb_root)
+        dataloaders, datasets = load_data_rgb(train_split, test_split, rgb_root)
 
     if not args.train:
         num_channel = args.num_channel
