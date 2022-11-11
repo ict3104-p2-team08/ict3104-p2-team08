@@ -233,6 +233,7 @@ def main():
             t0 = time.time()
 
     fout.close()
+    loop.close()
 
     # convert frame to video
     args = parse_config()
@@ -259,6 +260,7 @@ def main():
 
     cv2.destroyAllWindows()
     video.release()
+    loop2.close()
     print("Done")
 
 

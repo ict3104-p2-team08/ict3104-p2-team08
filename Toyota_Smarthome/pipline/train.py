@@ -239,6 +239,7 @@ def run(models, criterion, num_epochs=50):
         loop.set_description("training..")
         loop.update(1)
     torch.save(bestModel, './Toyota_Smarthome/pipline/models/' + str(args.name))
+    loop.close()
     print("Completed")
 
 

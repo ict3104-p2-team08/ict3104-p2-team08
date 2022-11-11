@@ -483,6 +483,7 @@ def create_caption_video(arrayWithCaptions):
     cap.release()
     # close all windows
     cv2.destroyAllWindows()
+    loop.close()
 
     generateCSV(array_for_csv)
 
