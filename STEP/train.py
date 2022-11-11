@@ -29,9 +29,11 @@ from data.augmentations import TubeAugmentation, BaseTransform
 from step_utils.eval_utils import ava_evaluation
 from external.ActivityNet.Evaluation.get_ava_performance import read_labelmap
 from tqdm import tqdm
+import warnings
 
 
 args = parse_config()
+warnings.filterwarnings("ignore")
 
 try:
     import apex
@@ -237,10 +239,10 @@ def train(args, nets, optimizer, scheduler, train_dataloader, val_dataloader, lo
     global best_mAP
 
     # Initialize WandB
-    #wandb.init(name=args.model_name + " Performance",
-    #           project='ICT3104_project_STEP',
-    #           notes='This is a performance testing project for STEP algorithm',
-    #           tags=['AVA dataset', 'Test Run'])
+    wandb.init(name=args.model_name + " Performance",
+               project='ICT3104_project_STEP',
+               notes='This is a performance testing project for STEP algorithm',
+               tags=['AVA dataset', 'Test Run'])
 
     for _, net in nets.items():
         net.train()
@@ -492,14 +494,14 @@ def train(args, nets, optimizer, scheduler, train_dataloader, val_dataloader, lo
             log_file.write(prt_str2)
 
             # Log the loss and accuracy values at the end of each epoch
-            #wandb.log({
-            #    "Epoch": epochs,
-            #    "val_mAP": all_metrics[-1]['PascalBoxes_Precision/mAP@0.5IOU'],
-            #    "loss_global_cls": losses_global_cls.avg,
-            #    "losses_local_loc": losses_local_loc.avg,
-            #    "losses_neighbor_loc": losses_neighbor_loc.avg,
-            #    "GPU usage": gpu_memory[0]
-            #})
+            wandb.log({
+                "Epoch": epochs,
+                "val_mAP": all_metrics[-1]['PascalBoxes_Precision/mAP@0.5IOU'],
+                "loss_global_cls": losses_global_cls.avg,
+                "losses_local_loc": losses_local_loc.avg,
+                "losses_neighbor_loc": losses_neighbor_loc.avg,
+                "GPU usage": gpu_memory[0]
+            })
 
         # show progress bar
         loop.set_description("Training..")
@@ -507,6 +509,7 @@ def train(args, nets, optimizer, scheduler, train_dataloader, val_dataloader, lo
         epochs += 1
     print("Done")
     log_file.close()
+    loop.close()
 #    writer.close()
 
 
@@ -635,7 +638,7 @@ def validate(args, val_dataloader, nets, iteration=0, iou_thresh=0.5):
 
         metrics = ava_evaluation(os.path.join(args.data_root, 'label/'), output_files[i], gt_file)
         all_metrics.append(metrics)
-    
+
     return all_metrics, data_csv_output
 
 

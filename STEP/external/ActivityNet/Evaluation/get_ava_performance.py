@@ -205,7 +205,7 @@ def run_evaluation(labelmap, groundtruth, detections, exclusions):
   start = time.time()
   metrics = pascal_evaluator.evaluate()
   print_time("run_evaluator", start)
-  pprint.pprint(metrics, indent=2)
+  #pprint.pprint(metrics, indent=2)
 
   return metrics
 
