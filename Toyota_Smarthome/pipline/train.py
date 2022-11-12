@@ -196,6 +196,7 @@ def run(models, criterion, num_epochs=50):
 
     bestModel = None
     best_map = 0.0
+    # T08-7 As a user, I want to see some visual elements to indicate progress of the training so that I am aware of the status of the training
     loop = tqdm(total=num_epochs, position=0, leave=True)
     for model, gpu, dataloader, optimizer, sched, model_file in models:
         num_train_videos = len(dataloader['train'])
@@ -226,6 +227,9 @@ def run(models, criterion, num_epochs=50):
         for activity_index in range(len(avg_class_prediction)):
             pred_in_percentage = float_to_percent(avg_class_prediction[activity_index])
             avg_class_prediction_result[activityList[activity_index]] = pred_in_percentage
+
+        # T08-34 As a user, I want to a human-readable results for the losses and mAP values so that I can easily read the values.
+        # T08-17 As a user, I want to run the testing sequence to perform inference on each data sample so that I can collect/accumulate some statistics
         # Log the loss and accuracy values at the end of each epoch
         wandb.log({
             "Average Class Prediction": avg_class_prediction_result,
@@ -235,6 +239,8 @@ def run(models, criterion, num_epochs=50):
             "Valid Loss": val_loss,
             "Valid Acc": val_map})
 
+        # T08-62 As a user, I would like to see progress bar for loading video toggling so that I am aware on the progress of the video loading.
+        # T08-7 As a user, I want to see some visual elements to indicate progress of the training so that I am aware of the status of the training
         # show progress bar
         loop.set_description("training..")
         loop.update(1)
@@ -398,6 +404,8 @@ def prepare_write_data_for_csv(prob_val, avg_class_prediction, train_map, train_
     val_map = float(val_map)
     val_loss = float(val_loss)
 
+    # T08-08 As a user, I want the results of the testing to be saved to a results folder in the repo so that I can review it another time
+    # T08-17 As a user, I want to run the testing sequence to perform inference on each data sample so that I can collect/accumulate some statistics
     # write to csv in output folder
     with open("./Toyota_Smarthome/pipline/result/" + args.name + ".csv", "w", newline="") as file:
 
@@ -417,6 +425,7 @@ def prepare_write_data_for_csv(prob_val, avg_class_prediction, train_map, train_
         header_2 = ["Trained on", "Train m-AP", "Train loss", "Tested on", "Prediction m-AP", "Prediction loss", "Epoch"]
         writer.writerow(header_2)
 
+        # T08-34 As a user, I want to a human-readable results for the losses and mAP values so that I can easily read the values.
         # write content 2
         train_map = convert_two_decimal(train_map)
         train_loss = convert_two_decimal(train_loss)

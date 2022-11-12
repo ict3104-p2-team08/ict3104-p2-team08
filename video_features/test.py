@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-videosToExtract', type=str)
 args = parser.parse_args()
 
+# T08-53 As a user, I want to see .npy file generated in the data folder so that I can upload the file to feed testing and training
 rgb_viashin_path = '../Toyota_Smarthome/pipline/data/i3d_CS.json'
 smarthome_cs_path = '../Toyota_Smarthome/pipline/data/smarthome_CS_51.json'
 
