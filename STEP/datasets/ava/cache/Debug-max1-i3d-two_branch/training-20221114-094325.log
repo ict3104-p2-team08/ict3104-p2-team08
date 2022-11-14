@@ -1,0 +1,261 @@
+Debug-max1-i3d-two_branch
+Data agumentation: ConvertFromInts ToAbsoluteCoords ToPercentCoords Resize SubtractMeans DivideStds 
+Training size: 880
+Validation size: 897
+NUM_CHUNKS: {1: 1, 2: 1, 3: 3, 4: 3}
+NUM_SAMPLE: -1
+T: 3
+anchor_mode: 1
+base_lr: 1.0
+base_net: i3d
+batch_size: 2
+cls_thresh: [0.2]
+conf_thresh: 0.01
+cuda: True
+cycle_decay: 1.0
+data_root: ./datasets/ava/
+dataset: ava
+det_lr: 0.001
+det_lr0: 0.001
+det_net: two_branch
+do_crop: False
+do_erase: False
+do_flip: False
+do_photometric: False
+do_proposal_augment: False
+dropout: 0.0
+evaluate_topk: -1
+exp_name: Debug-max1-i3d-two_branch
+fc_dim: 4096
+fp16: False
+fps: 12
+freeze_affine: True
+freeze_stats: True
+gamma: 0.1
+id2class: {1: 'bend/bow (at the waist)', 3: 'crouch/kneel', 4: 'dance', 5: 'fall down', 6: 'get up', 7: 'jump/leap', 8: 'lie/sleep', 9: 'martial art', 10: 'run/jog', 11: 'sit', 12: 'stand', 13: 'swim', 14: 'walk', 15: 'answer phone', 17: 'carry/hold (an object)', 20: 'climb (e.g., a mountain)', 22: 'close (e.g., a door, a box)', 24: 'cut', 26: 'dress/put on clothing', 27: 'drink', 28: 'drive (e.g., a car, a truck)', 29: 'eat', 30: 'enter', 34: 'hit (an object)', 36: 'lift/pick up', 37: 'listen (e.g., to music)', 38: 'open (e.g., a window, a car door)', 41: 'play musical instrument', 43: 'point to (an object)', 45: 'pull (an object)', 46: 'push (an object)', 47: 'put down', 48: 'read', 49: 'ride (e.g., a bike, a car, a horse)', 51: 'sail boat', 52: 'shoot', 54: 'smoke', 56: 'take a photo', 57: 'text on/look at a cellphone', 58: 'throw', 59: 'touch (an object)', 60: 'turn (e.g., a screwdriver)', 61: 'watch (e.g., TV)', 62: 'work on a computer', 63: 'write', 64: 'fight/hit (a person)', 65: 'give/serve (an object) to (a person)', 66: 'grab (a person)', 67: 'hand clap', 68: 'hand shake', 69: 'hand wave', 70: 'hug (a person)', 72: 'kiss (a person)', 73: 'lift (a person)', 74: 'listen to (a person)', 76: 'push (another person)', 77: 'sing to (e.g., self, a person, a group)', 78: 'take (an object) from (a person)', 79: 'talk to (e.g., self, a person, a group)', 80: 'watch (a person)'}
+image_size: (400, 400)
+input_type: rgb
+iou_thresh: 0.5
+iterative_mode: temporal
+kinetics_pretrain: None
+label_dict: {0: 1, 1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8, 7: 9, 8: 10, 9: 11, 10: 12, 11: 13, 12: 14, 13: 15, 14: 17, 15: 20, 16: 22, 17: 24, 18: 26, 19: 27, 20: 28, 21: 29, 22: 30, 23: 34, 24: 36, 25: 37, 26: 38, 27: 41, 28: 43, 29: 45, 30: 46, 31: 47, 32: 48, 33: 49, 34: 51, 35: 52, 36: 54, 37: 56, 38: 57, 39: 58, 40: 59, 41: 60, 42: 61, 43: 62, 44: 63, 45: 64, 46: 65, 47: 66, 48: 67, 49: 68, 50: 69, 51: 70, 52: 72, 53: 73, 54: 74, 55: 76, 56: 77, 57: 78, 58: 79, 59: 80}
+lambda_cls: 0.1
+lambda_neighbor: 0.1
+lambda_reg: 10
+mGPUs: True
+man_seed: 123
+max_epochs: 1
+max_iter: 1
+max_pos_num: 5
+means: (0, 0, 0)
+milestones: [440]
+min_ratio: 0.0
+model_name: modelTest
+momentum: 0.9
+name: Debug
+neg_ratio: 1
+nms_thresh: 0.4
+no_context: False
+num_classes: 60
+num_workers: 1
+optimizer: sgd
+pool_mode: pool
+pool_size: 7
+pretrain_path: None
+print_step: 100
+proposal_path_train: None
+proposal_path_val: None
+reg_thresh: [0.2]
+resume_path: None
+sampling: uniform
+save_root: ./datasets/ava/cache\Debug-max1-i3d-two_branch/
+save_step: 9999999
+scale_norm: 2
+scheduler: cosine
+selection_nms: False
+selection_sampling: softmax
+selection_score: score
+start_epochs: 0
+start_iteration: 0
+stds: (1, 1, 1)
+temporal_mode: extrapolate
+topk: -1
+video_name: Debug
+video_test: Debug
+video_train: Debug
+warmup_iters: 1000
+weight_decay: 1e-07
+TwoBranchNet(
+  (i3d_conv): Sequential(
+    (0): Mixed(
+      (branch_0): Unit3Dpy(
+        (conv3d): Conv3d(832, 256, kernel_size=(1, 1, 1), stride=(1, 1, 1), bias=False)
+        (batch3d): BatchNorm3d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+      (branch_1): Sequential(
+        (0): Unit3Dpy(
+          (conv3d): Conv3d(832, 160, kernel_size=(1, 1, 1), stride=(1, 1, 1), bias=False)
+          (batch3d): BatchNorm3d(160, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+        (1): Unit3Dpy(
+          (conv3d): Conv3d(160, 320, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1), bias=False)
+          (batch3d): BatchNorm3d(320, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+      )
+      (branch_2): Sequential(
+        (0): Unit3Dpy(
+          (conv3d): Conv3d(832, 32, kernel_size=(1, 1, 1), stride=(1, 1, 1), bias=False)
+          (batch3d): BatchNorm3d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+        (1): Unit3Dpy(
+          (conv3d): Conv3d(32, 128, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1), bias=False)
+          (batch3d): BatchNorm3d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+      )
+      (branch_3): Sequential(
+        (0): MaxPool3dTFPadding(
+          (pad): ConstantPad3d(padding=(1, 1, 1, 1, 1, 1), value=0)
+          (pool): MaxPool3d(kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=0, dilation=1, ceil_mode=True)
+        )
+        (1): Unit3Dpy(
+          (conv3d): Conv3d(832, 128, kernel_size=(1, 1, 1), stride=(1, 1, 1), bias=False)
+          (batch3d): BatchNorm3d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+      )
+    )
+    (1): Mixed(
+      (branch_0): Unit3Dpy(
+        (conv3d): Conv3d(832, 384, kernel_size=(1, 1, 1), stride=(1, 1, 1), bias=False)
+        (batch3d): BatchNorm3d(384, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+      (branch_1): Sequential(
+        (0): Unit3Dpy(
+          (conv3d): Conv3d(832, 192, kernel_size=(1, 1, 1), stride=(1, 1, 1), bias=False)
+          (batch3d): BatchNorm3d(192, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+        (1): Unit3Dpy(
+          (conv3d): Conv3d(192, 384, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1), bias=False)
+          (batch3d): BatchNorm3d(384, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+      )
+      (branch_2): Sequential(
+        (0): Unit3Dpy(
+          (conv3d): Conv3d(832, 48, kernel_size=(1, 1, 1), stride=(1, 1, 1), bias=False)
+          (batch3d): BatchNorm3d(48, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+        (1): Unit3Dpy(
+          (conv3d): Conv3d(48, 128, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1), bias=False)
+          (batch3d): BatchNorm3d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+      )
+      (branch_3): Sequential(
+        (0): MaxPool3dTFPadding(
+          (pad): ConstantPad3d(padding=(1, 1, 1, 1, 1, 1), value=0)
+          (pool): MaxPool3d(kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=0, dilation=1, ceil_mode=True)
+        )
+        (1): Unit3Dpy(
+          (conv3d): Conv3d(832, 128, kernel_size=(1, 1, 1), stride=(1, 1, 1), bias=False)
+          (batch3d): BatchNorm3d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+      )
+    )
+  )
+  (downsample): Conv3d(1024, 4096, kernel_size=(1, 1, 1), stride=(1, 1, 1))
+  (dropout): Dropout(p=0.0, inplace=False)
+  (global_cls): Conv3d(201728, 60, kernel_size=(1, 1, 1), stride=(1, 1, 1))
+  (local_conv): Sequential(
+    (0): Bottleneck_resample(
+      (conv1): Conv2d(4928, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (conv2): Conv2d(4928, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (conv3): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (conv4): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (relu): ReLU(inplace=True)
+    )
+    (1): Bottleneck(
+      (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (relu): ReLU(inplace=True)
+    )
+    (2): Bottleneck(
+      (conv1): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (conv3): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (relu): ReLU(inplace=True)
+    )
+  )
+  (downsample2): Conv2d(1024, 4096, kernel_size=(1, 1), stride=(1, 1))
+  (local_reg): Linear(in_features=200704, out_features=4, bias=True)
+  (neighbor_reg1): Linear(in_features=200704, out_features=4, bias=True)
+  (neighbor_reg2): Linear(in_features=200704, out_features=4, bias=True)
+)
+
+Epoch 1/1(440) Iteration 000100 lr 1.90e-04 loss-1 1.539 loss_global_cls 0.692 loss_local_loc 0.085 loss_neighbor_loc 0.000 Timer 79.273(79.273) GPU usage: [4453]
+Epoch 1/1(440) Iteration 000200 lr 2.80e-04 loss-1 1.466 loss_global_cls 0.690 loss_local_loc 0.078 loss_neighbor_loc 0.000 Timer 60.544(69.909) GPU usage: [4187]
+Epoch 1/1(440) Iteration 000300 lr 3.70e-04 loss-1 1.446 loss_global_cls 0.684 loss_local_loc 0.076 loss_neighbor_loc 0.000 Timer 60.853(66.890) GPU usage: [4187]
+Epoch 1/1(440) Iteration 000400 lr 4.60e-04 loss-1 1.465 loss_global_cls 0.675 loss_local_loc 0.079 loss_neighbor_loc 0.000 Timer 63.253(65.981) GPU usage: [4183]
+Iter 1: MEANAP =>0.010365137675628387
+Best MEANAP so far => 0
+(1) bend/bow (at the waist): 0.0019241011984021308
+(3) crouch/kneel: nan
+(4) dance: nan
+(5) fall down: nan
+(6) get up: 0.00021034708795550507
+(7) jump/leap: nan
+(8) lie/sleep: nan
+(9) martial art: nan
+(10) run/jog: 0.001075268817204301
+(11) sit: 0.014312905769625486
+(12) stand: 0.03774756372943635
+(13) swim: nan
+(14) walk: 0.011122983594198856
+(15) answer phone: nan
+(17) carry/hold (an object): 0.024778274540131547
+(20) climb (e.g., a mountain): nan
+(22) close (e.g., a door, a box): nan
+(24) cut: nan
+(26) dress/put on clothing: nan
+(27) drink: nan
+(28) drive (e.g., a car, a truck): nan
+(29) eat: nan
+(30) enter: nan
+(34) hit (an object): nan
+(36) lift/pick up: 0.0
+(37) listen (e.g., to music): nan
+(38) open (e.g., a window, a car door): nan
+(41) play musical instrument: nan
+(43) point to (an object): nan
+(45) pull (an object): nan
+(46) push (an object): nan
+(47) put down: nan
+(48) read: nan
+(49) ride (e.g., a bike, a car, a horse): nan
+(51) sail boat: nan
+(52) shoot: nan
+(54) smoke: nan
+(56) take a photo: nan
+(57) text on/look at a cellphone: nan
+(58) throw: 0.0
+(59) touch (an object): 0.0008630676395958492
+(60) turn (e.g., a screwdriver): nan
+(61) watch (e.g., TV): nan
+(62) work on a computer: nan
+(63) write: nan
+(64) fight/hit (a person): nan
+(65) give/serve (an object) to (a person): nan
+(66) grab (a person): nan
+(67) hand clap: 0.0
+(68) hand shake: nan
+(69) hand wave: 0.0
+(70) hug (a person): nan
+(72) kiss (a person): nan
+(73) lift (a person): nan
+(74) listen to (a person): 0.007931190967333931
+(76) push (another person): nan
+(77) sing to (e.g., self, a person, a group): nan
+(78) take (an object) from (a person): nan
+(79) talk to (e.g., self, a person, a group): 0.045917053666417504
+(80) watch (a person): 0.009594308124124333
+
+Validation TIME::: 253.168
+
