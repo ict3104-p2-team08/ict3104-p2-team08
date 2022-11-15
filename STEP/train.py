@@ -264,6 +264,7 @@ def train(args, nets, optimizer, scheduler, train_dataloader, val_dataloader, lo
     iteration = args.start_iteration
     epoch_size = int(np.ceil(len(train_dataloader.dataset) / args.batch_size))
 
+    # T08-7 As a user, I want to see some visual elements to indicate progress of the training so that I am aware of the status of the training
     loop = tqdm(total=epochs, position=0, leave=True)
     loop.set_description("Training..")
     loop.update(0)
@@ -458,6 +459,8 @@ def train(args, nets, optimizer, scheduler, train_dataloader, val_dataloader, lo
     
                 torch.save(save_dict, save_name)
 
+                # T08-08 As a user, I want the results of the testing to be saved to a results folder in the repo so that I can review it another time
+                # T08-17 As a user, I want to run the testing sequence to perform inference on each data sample so that I can collect/accumulate some statistics
                 # write data to result csv
                 # write to csv in output folder
                 with open("./result/" + args.model_name + ".csv", "w", newline="") as file:
@@ -493,6 +496,7 @@ def train(args, nets, optimizer, scheduler, train_dataloader, val_dataloader, lo
             #print(prt_str2)
             log_file.write(prt_str2)
 
+            # T08-17 As a user, I want to run the testing sequence to perform inference on each data sample so that I can collect/accumulate some statistics
             # Log the loss and accuracy values at the end of each epoch
             wandb.log({
                 "Epoch": epochs,
@@ -503,6 +507,7 @@ def train(args, nets, optimizer, scheduler, train_dataloader, val_dataloader, lo
                 "GPU usage": gpu_memory[0]
             })
 
+        # T08-7 As a user, I want to see some visual elements to indicate progress of the training so that I am aware of the status of the training
         # show progress bar
         loop.set_description("Training..")
         loop.update(1)

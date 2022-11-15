@@ -250,6 +250,7 @@ def main():
     # loading bar for stitching frames into video
     loop2 = tqdm(total=len(frame_arr), position=0, leave=True)
 
+    # T08-50 As a user, I want the generated caption video to be save somewhere in a folder
     for i in range(len(frame_arr)):
         img = cv2.imread('./datasets/demo/results/' + args.video_name[:-4] + "/" + frame_arr[i])
         video.write(img)

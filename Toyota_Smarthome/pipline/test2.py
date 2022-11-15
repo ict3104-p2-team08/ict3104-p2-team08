@@ -361,6 +361,7 @@ def val_step(model, gpu, dataloader, epoch):
 
     return full_probs, epoch_loss, val_map
 
+# T08-6 As a user, I want to have video caption in each video and frame so that I can make inference and understand the current detected activity
 def create_caption_video(arrayWithCaptions):
     import cv2
     videofile = args.videofile.replace('_rgb', '')
@@ -374,9 +375,12 @@ def create_caption_video(arrayWithCaptions):
     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     # we are using x264 codec for mp4
     fourcc = cv2.VideoWriter_fourcc(*'avc1')
+    # T08-51 As a user, I want the generated caption video to be save somewhere in a folder
     writer = cv2.VideoWriter('./Toyota_Smarthome/pipline/video_output/' + args.videofile + '_caption.mp4', apiPreference=0, fourcc=fourcc,
                              fps=video_fps[0], frameSize=(int(width), int(height)))
 
+    # T08-62 As a user, I would like to see progress bar for loading video toggling so that I am aware on the progress of the video loading.
+    # T08-7 As a user, I want to see some visual elements to indicate progress of the training so that I am aware of the status of the training
     loop = tqdm(total=length, position=0, leave=True)
     i = 1 #frame counter
     counter = 0 #counter for arrayWithCaptions
@@ -400,6 +404,7 @@ def create_caption_video(arrayWithCaptions):
                     (0, 255, 0),
                     2,
                     cv2.LINE_4)
+        # T08-51 As a user, I want to be able to see the caption generated clearly
         # Use putText() method for
         # inserting text on video
         caption = arrayWithCaptions[counter][0]
@@ -433,10 +438,12 @@ def create_caption_video(arrayWithCaptions):
                         (0, 255, 0),
                         2,
                         cv2.LINE_4)
+            # T08-6 As a user, I want to know whether the model has correctly predicted the actions in the video
             # write confident rate if caption predicted matches annotated caption
             if caption == caption1:
                 cv2.putText(frame, str(arrayWithCaptions[counter][1]), (600, 20), font, 0.5, (0, 255, 0), 2, cv2.LINE_4)
             if annotated_current_position < len(annotated_csv) - 1:
+                # T08-47 As a user, I want to be able to see annotated caption in the video at each frame
                 if int(annotated_csv[annotated_current_position + 1][1]) <= i <= int(annotated_csv[annotated_current_position + 1][2]):
                     caption2 = annotated_csv[annotated_current_position + 1][0]
                     cv2.putText(frame,
@@ -447,6 +454,7 @@ def create_caption_video(arrayWithCaptions):
                                 2,
                                 cv2.LINE_4)
 
+                    # T08-6 As a user, I want to know whether the model has correctly predicted the actions in the video
                     # write confident rate if caption predicted matches annotated caption
                     if caption == caption2:
                         cv2.putText(frame, str(arrayWithCaptions[counter][1]), (600, 20), font, 0.5, (0, 255, 0), 2,
@@ -455,6 +463,8 @@ def create_caption_video(arrayWithCaptions):
         if i >= int(annotated_csv[annotated_current_position][2]) and annotated_current_position < len(annotated_csv) - 1:
             annotated_current_position += 1
 
+        # T08-62 As a user, I would like to see progress bar for loading video toggling so that I am aware on the progress of the video loading.
+        # T08-7 As a user, I want to see some visual elements to indicate progress of the training so that I am aware of the status of the training
         #show progress bar
         loop.set_description("generating video...".format(i))
         loop.update(1)
@@ -498,6 +508,7 @@ def generateCSV(arrayForCSV):
         # write multiple rows
         writer.writerows(arrayForCSV)
 
+#T08-52 As a user, I want the annotated caption to be from the csv files provided by TSU
 def readCSV():
     videofile = args.videofile.replace('_rgb', '')
     filePath = "./data/input_csv/" + videofile + ".csv"
