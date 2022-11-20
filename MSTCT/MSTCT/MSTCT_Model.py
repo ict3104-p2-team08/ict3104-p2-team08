@@ -1,7 +1,7 @@
 import torch.nn as nn
-from Classification_Module import Classification_Module
-from TS_Mixer import Temporal_Mixer
-from Temporal_Encoder import TemporalEncoder
+from .Classification_Module import Classification_Module
+from .TS_Mixer import Temporal_Mixer
+from .Temporal_Encoder import TemporalEncoder
 
 
 class MSTCT(nn.Module):

@@ -14,23 +14,23 @@ from apmeter import APMeter
 import os
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-mode', type=str, help='rgb or flow (or joint for eval)')
-parser.add_argument('-train', type=str2bool, default='True', help='train or eval')
-parser.add_argument('-comp_info', type=str)
+parser.add_argument('-mode', type=str, default='rgb')
+parser.add_argument('-train', type=bool, default='True', help='train or eval')
+parser.add_argument('-comp_info', type=bool)
 parser.add_argument('-gpu', type=str, default='4')
 parser.add_argument('-dataset', type=str, default='charades')
 parser.add_argument('-rgb_root', type=str, default='no_root')
 parser.add_argument('-flow_root', type=str, default='no_root')
 parser.add_argument('-type', type=str, default='original')
 parser.add_argument('-lr', type=str, default='0.1')
-parser.add_argument('-epoch', type=str, default='50')
-parser.add_argument('-model', type=str, default='')
+parser.add_argument('-epoch', type=str, default='2')
+parser.add_argument('-model', type=str, default='MS_TCT')
 parser.add_argument('-load_model', type=str, default='False')
-parser.add_argument('-batch_size', type=str, default='False')
-parser.add_argument('-num_clips', type=str, default='False')
-parser.add_argument('-skip', type=str, default='False')
+parser.add_argument('-batch_size', type=str, default='1')
+parser.add_argument('-num_clips', type=str, default='3')
+parser.add_argument('-skip', type=str, default='1')
 parser.add_argument('-num_layer', type=str, default='False')
-parser.add_argument('-unisize', type=str, default='False')
+parser.add_argument('-unisize', type=str, default='True')
 parser.add_argument('-alpha_l', type=float, default='1.0')
 parser.add_argument('-beta_l', type=float, default='1.0')
 args = parser.parse_args()
@@ -45,7 +45,6 @@ torch.cuda.manual_seed_all(SEED)
 random.seed(SEED)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
-print('Random_SEED:', SEED)
 
 
 batch_size = int(args.batch_size)
@@ -55,7 +54,7 @@ if args.dataset == 'charades':
     from charades_dataloader import Charades as Dataset
 
     if str(args.unisize) == "True":
-        print("uni-size padd all T to",args.num_clips)
+#         print("uni-size padd all T to",args.num_clips)
         from charades_dataloader import collate_fn_unisize
         collate_fn_f = collate_fn_unisize(args.num_clips)
         collate_fn = collate_fn_f.charades_collate_fn_unisize
@@ -64,7 +63,7 @@ if args.dataset == 'charades':
 
     train_split = './data/charades.json'
     test_split = train_split
-    rgb_root =  './MSTCT/data/RGB_i3d_16frames_64000_SSD/' 
+    rgb_root =  './dataset/' 
     flow_root = '/flow_feat_path/' # optional
     # rgb_of=[rgb_root,flow_root]
     classes = 157
@@ -77,7 +76,7 @@ def load_data(train_split, val_split, root):
     if len(train_split) > 0:
         dataset = Dataset(train_split, 'training', root, batch_size, classes, int(args.num_clips), int(args.skip))
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=8,
-                                                 pin_memory=True, collate_fn=collate_fn)
+                                                 pin_memory=False, collate_fn=collate_fn)
         dataloader.root = root
     else:
 
@@ -86,11 +85,12 @@ def load_data(train_split, val_split, root):
 
     val_dataset = Dataset(val_split, 'testing', root, batch_size, classes, int(args.num_clips), int(args.skip))
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=2,
-                                                 pin_memory=True, collate_fn=collate_fn)
+                                                 pin_memory=False, collate_fn=collate_fn)
     val_dataloader.root = root
     dataloaders = {'train': dataloader, 'val': val_dataloader}
     datasets = {'train': dataset, 'val': val_dataset}
     
+#     print(dataloader, datasets)
     return dataloaders, datasets
 
 

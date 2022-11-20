@@ -10,7 +10,7 @@ python train.py \
 -skip 0 \
 -lr 0.0001 \
 -comp_info False \
--epoch 50 \
+-epoch 2 \
 -unisize True \
 -alpha_l 1 \
 -beta_l 0.05 \
